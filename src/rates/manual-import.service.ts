@@ -1,10 +1,14 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PROVIDER_REPO, ProviderRepository, QUOTE_REPO, QuoteRepository } from './ports';
 import { effectiveRate } from '../domain/money';
+import { minorFactor } from '../domain/currency';
+import { findCorridor, rateLooksSane } from '../domain/corridor';
 import { PayoutMethod } from '../domain/types';
 
 export interface ManualQuoteRow {
   providerSlug: string;
+  /** "KR-UZ" — qaysi koridor o'lchangani */
+  corridorId: string;
   sendMinor: bigint;
   feeMinor: bigint;
   recvMinor: bigint;
@@ -52,13 +56,18 @@ export class ManualImportService {
         report.failed.push({ row: i + 1, reason: `provayder topilmadi: ${row.providerSlug}` });
         continue;
       }
+      const corridor = findCorridor(row.corridorId)!;
       await this.quotes.create({
         providerId: provider.id,
-        sendCurrency: 'KRW',
-        recvCurrency: 'UZS',
+        corridorId: corridor.id,
+        sendCurrency: corridor.sendCurrency,
+        recvCurrency: corridor.recvCurrency,
         sendMinor: row.sendMinor,
         feeMinor: row.feeMinor,
-        rate: effectiveRate(row.recvMinor, row.sendMinor),
+        rate: effectiveRate(
+          row.recvMinor, row.sendMinor,
+          corridor.sendCurrency, corridor.recvCurrency,
+        ),
         recvMinor: row.recvMinor,
         recvBank: row.recvBank ?? null,
         payoutMethod: row.payoutMethod ?? null,
@@ -76,12 +85,21 @@ export class ManualImportService {
 
 export function validateRow(row: ManualQuoteRow): string | null {
   if (!row.providerSlug) return 'kanal nomi bo\'sh';
+  const corridor = findCorridor(row.corridorId);
+  if (!corridor) return `noma'lum koridor: ${row.corridorId}`;
   if (row.sendMinor <= 0n) return 'yuborilgan summa musbat emas';
   if (row.recvMinor <= 0n) return 'qo\'lga tekkan summa musbat emas';
   if (row.feeMinor < 0n) return 'komissiya manfiy';
-  const rate = Number(row.recvMinor) / Number(row.sendMinor);
-  // Aqlga sig'adigan oraliq: 1 KRW ~ 8-9 so'm. Bundan uzoq bo'lsa - kiritish xatosi.
-  if (rate < 4 || rate > 20) return `kurs shubhali (${rate.toFixed(2)}) — birlikni tekshiring`;
+
+  // Aqlga sig'adigan oraliq KORIDORDAN keladi. Ilgari u 4-20 deb qattiq
+  // yozilgan edi — bu faqat KRW->UZS uchun to'g'ri va Rossiya koridorida
+  // (RUB->UZS ~ 150) har bir to'g'ri qatorni rad etardi.
+  const check = rateLooksSane(corridor, row.sendMinor, row.recvMinor, minorFactor);
+  if (!check.ok) {
+    return `kurs shubhali (${check.rate.toFixed(2)}), ${corridor.id} uchun kutilgan ` +
+      `${corridor.sanityRateMin}-${corridor.sanityRateMax} — birlikni tekshiring`;
+  }
+
   if (row.measuredAt.getTime() > Date.now() + 86_400_000) return 'sana kelajakda';
   return null;
 }

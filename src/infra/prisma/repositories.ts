@@ -29,11 +29,11 @@ export class PrismaQuoteRepo implements QuoteRepository {
   }
 
   /** Har bir provayder uchun eng oxirgi kotirovka. */
-  async latestPerProvider(send: 'KRW', recv: 'UZS'): Promise<Quote[]> {
+  async latestPerProvider(corridorId: string): Promise<Quote[]> {
     const rows = await this.db.$queryRaw<Quote[]>`
       SELECT DISTINCT ON ("providerId") *
       FROM "quotes"
-      WHERE "sendCurrency" = ${send} AND "recvCurrency" = ${recv}
+      WHERE "corridorId" = ${corridorId}
       ORDER BY "providerId", "fetchedAt" DESC
     `;
     return rows;

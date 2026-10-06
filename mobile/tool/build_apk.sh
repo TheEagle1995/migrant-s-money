@@ -8,7 +8,7 @@ API_URL="${1:-}"
 
 if [ ! -d android ]; then
   echo "==> Platforma fayllari yaratilmoqda"
-  flutter create --platforms=android --org uz.remit --project-name remit .
+  flutter create --platforms=android --org uz.chiroq --project-name chiroq .
 fi
 
 echo "==> Android overrides"

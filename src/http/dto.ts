@@ -7,6 +7,7 @@ const minor = z
 
 export const declareTransferSchema = z.object({
   householdId: z.string().min(1),
+  corridorId: z.string().min(3),
   providerSlug: z.string().min(1).optional(),
   sentMinor: minor,
   declaredAt: z.coerce.date().optional(),
@@ -15,6 +16,7 @@ export type DeclareTransferDto = z.infer<typeof declareTransferSchema>;
 
 export const ingestEventSchema = z.object({
   householdId: z.string().min(1),
+  currency: z.string().length(3),
   amountMinor: minor,
   kind: z.enum(['CREDIT', 'DEBIT']),
   bankSlug: z.string().min(1),
@@ -35,6 +37,7 @@ export const manualImportSchema = z.object({
   rows: z.array(
     z.object({
       providerSlug: z.string().min(1),
+      corridorId: z.string().min(3),
       sendMinor: minor,
       feeMinor: minor,
       recvMinor: minor,

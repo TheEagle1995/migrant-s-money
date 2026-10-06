@@ -1,17 +1,21 @@
 /**
- * Pul — har doim BigInt minor unit + valyuta kodi. Float hech qachon.
- * KRW: butun won. UZS: butun so'm (tiyin muomalada yo'q).
+ * Pul arifmetikasi.
+ *
+ * Formatlash va matndan o'qish `currency.ts` ga ko'chdi, chunki ular valyuta
+ * kasrini bilishi kerak. Bu yerda faqat valyutadan mustaqil amallar qoldi:
+ * normallashtirish va kurs hisobi — ikkalasi ham minor unitlar ustida ishlaydi.
  */
-export type Currency = 'KRW' | 'UZS' | 'USD';
+
+import { CurrencyCode, currency, formatMinor as fmt, displayMinor } from './currency';
 
 export interface Money {
   readonly minor: bigint;
-  readonly currency: Currency;
+  readonly currency: CurrencyCode;
 }
 
-export const money = (minor: bigint | number, currency: Currency): Money => ({
+export const money = (minor: bigint | number, code: CurrencyCode): Money => ({
   minor: typeof minor === 'number' ? BigInt(Math.round(minor)) : minor,
-  currency,
+  currency: code,
 });
 
 export function assertSame(a: Money, b: Money): void {
@@ -30,30 +34,43 @@ export const subMoney = (a: Money, b: Money): Money => {
   return { minor: a.minor - b.minor, currency: a.currency };
 };
 
+export const formatMoney = (m: Money): string => fmt(m.minor, m.currency);
+export const displayMoney = (m: Money): string => displayMinor(m.minor, m.currency);
+
 /**
- * Har xil summadagi kotirovkalarni bir bazaga keltirish.
- * Taqqoslash faqat shundan keyin adolatli bo'ladi.
+ * Har xil summadagi kotirovkalarni bitta bazaga keltirish — taqqoslash faqat
+ * shundan keyin adolatli bo'ladi. Baza koridordan keladi (`Corridor.baseSendMinor`),
+ * bu yerda qattiq yozilmaydi.
  */
-export function normalizeTo(
-  recv: bigint,
-  sent: bigint,
-  base: bigint = 1_000_000n,
-): bigint {
-  if (sent <= 0n) throw new Error('Yuborilgan summa musbat bo\'lishi kerak');
-  return (recv * base) / sent;
+export function normalizeTo(recvMinor: bigint, sentMinor: bigint, baseSendMinor: bigint): bigint {
+  if (sentMinor <= 0n) throw new Error("Yuborilgan summa musbat bo'lishi kerak");
+  if (baseSendMinor <= 0n) throw new Error("Baza summa musbat bo'lishi kerak");
+  return (recvMinor * baseSendMinor) / sentMinor;
 }
 
-/** Ko'rsatish uchun: 8_520_000n UZS -> "8 520 000" */
-export function formatMinor(minor: bigint): string {
-  const s = minor.toString();
-  return s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-}
+/**
+ * Effektiv kurs — major birliklarda, satr sifatida (float saqlanmaydi).
+ * Valyuta kasrlari hisobga olinadi: KRW kasrsiz, UZS ikki kasrli, shuning
+ * uchun xom minor nisbatini olish 100 barobar xato beradi.
+ */
+export function effectiveRate(
+  recvMinor: bigint,
+  sentMinor: bigint,
+  sendCode: CurrencyCode,
+  recvCode: CurrencyCode,
+  dp = 10,
+): string {
+  if (sentMinor <= 0n) return '0';
+  const sendDigits = currency(sendCode).minorDigits;
+  const recvDigits = currency(recvCode).minorDigits;
 
-/** Effektiv kurs, string Decimal sifatida (float saqlanmaydi) */
-export function effectiveRate(recv: bigint, sent: bigint, dp = 10): string {
-  if (sent <= 0n) return '0';
+  // rate = (recvMinor / 10^recvDigits) / (sendMinor / 10^sendDigits)
+  //      = recvMinor * 10^sendDigits / (sendMinor * 10^recvDigits)
   const scale = 10n ** BigInt(dp);
-  const scaled = (recv * scale) / sent;
+  const numerator = recvMinor * 10n ** BigInt(sendDigits) * scale;
+  const denominator = sentMinor * 10n ** BigInt(recvDigits);
+  const scaled = numerator / denominator;
+
   const int = scaled / scale;
   const frac = (scaled % scale).toString().padStart(dp, '0');
   return `${int}.${frac}`;

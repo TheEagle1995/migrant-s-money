@@ -1,3 +1,4 @@
+import { CurrencyCode } from '../domain/currency';
 /**
  * Har bir provider uchun bitta adapter. Adapter faqat bitta ish qiladi:
  * berilgan summa uchun kotirovka olib keladi. Saqlash, retry, health —
@@ -5,8 +6,10 @@
  */
 
 export interface QuoteRequest {
-  sendCurrency: 'KRW';
-  recvCurrency: 'UZS';
+  /** "KR-UZ" */
+  corridorId: string;
+  sendCurrency: CurrencyCode;
+  recvCurrency: CurrencyCode;
   /** Minor unit. 1_000_000 KRW = 1000000n */
   sendMinor: bigint;
   recvBank?: string;

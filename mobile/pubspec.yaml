@@ -1,5 +1,5 @@
-name: remit
-description: Koreya -> O'zbekiston o'tkazma taqqoslash va oilaviy byudjet
+name: chiroq
+description: Chiroq — pul o'tkazmalarining yashirin narxini ko'rsatadi
 publish_to: none
 version: 0.1.0+1
 

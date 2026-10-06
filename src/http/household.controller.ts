@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
 import { MatchingService } from '../matching/matching.service';
 import { TRANSFER_REPO, TransferRepository } from '../household/ports';
 import { PROVIDER_REPO, ProviderRepository, QUOTE_REPO, QuoteRepository } from '../rates/ports';
@@ -9,6 +9,7 @@ import {
 import { GoalsService } from '../household/goals.service';
 import { ZodPipe } from './zod.pipe';
 import { normalizeTo } from '../domain/money';
+import { findCorridor } from '../domain/corridor';
 
 @Controller('household')
 export class HouseholdController {
@@ -23,6 +24,9 @@ export class HouseholdController {
   /** "Yubordim" tugmasi. Prognoz joriy kotirovkadan olinadi — match uchun asos. */
   @Post('transfers')
   async declare(@Body(new ZodPipe(declareTransferSchema)) dto: any) {
+    const corridor = findCorridor(dto.corridorId);
+    if (!corridor) throw new BadRequestException(`Noma'lum koridor: ${dto.corridorId}`);
+
     let providerId: string | null = null;
     let expected: bigint | null = null;
 
@@ -30,7 +34,7 @@ export class HouseholdController {
       const p = await this.providers.findBySlug(dto.providerSlug);
       if (p) {
         providerId = p.id;
-        const latest = await this.quotes.latestPerProvider('KRW', 'UZS');
+        const latest = await this.quotes.latestPerProvider(corridor.id);
         const q = latest.find((x) => x.providerId === p.id);
         if (q) expected = normalizeTo(q.recvMinor, q.sendMinor, dto.sentMinor);
       }
@@ -38,6 +42,7 @@ export class HouseholdController {
 
     const t = await this.transfers.create({
       householdId: dto.householdId,
+      corridorId: corridor.id,
       providerId,
       sentMinor: dto.sentMinor,
       expectedRecvMinor: expected,

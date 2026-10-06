@@ -1,9 +1,11 @@
 import { Provider, Quote, QuoteSource, RunStatus, PayoutMethod } from '../domain/types';
+import { CurrencyCode } from '../domain/currency';
 
 export interface NewQuote {
   providerId: string;
-  sendCurrency: 'KRW';
-  recvCurrency: 'UZS';
+  corridorId: string;
+  sendCurrency: CurrencyCode;
+  recvCurrency: CurrencyCode;
   sendMinor: bigint;
   feeMinor: bigint;
   rate: string;
@@ -25,7 +27,7 @@ export interface ProviderRepository {
 export interface QuoteRepository {
   /** Faqat INSERT. Update metodi ataylab yo'q. */
   create(q: NewQuote): Promise<void>;
-  latestPerProvider(send: 'KRW', recv: 'UZS'): Promise<Quote[]>;
+  latestPerProvider(corridorId: string): Promise<Quote[]>;
   history(providerId: string, since: Date): Promise<Quote[]>;
 }
 

@@ -9,8 +9,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as XLSX from 'xlsx';
+import { findCorridor } from '../src/domain/corridor';
+import { minorFactor, formatMinor } from '../src/domain/currency';
 
 const SHEET = 'Olchov';
+/** Jadval bitta koridor uchun to'ldiriladi; qaysi biri — argument bilan. */
+const DEFAULT_CORRIDOR = 'KR-UZ';
 const ENDPOINT = process.env.API_URL ?? 'http://localhost:3000/rates/import';
 
 /** Jadvaldagi kanal nomi -> DB slug */
@@ -28,6 +32,7 @@ const SLUGS: Record<string, string> = {
 
 interface Row {
   providerSlug: string;
+  corridorId: string;
   sendMinor: string;
   feeMinor: string;
   recvMinor: string;
@@ -57,7 +62,12 @@ function toDate(v: unknown): Date | null {
   return null;
 }
 
-export function extractRows(sheet: XLSX.WorkSheet): { rows: Row[]; skipped: string[] } {
+export function extractRows(
+  sheet: XLSX.WorkSheet,
+  corridorId: string = DEFAULT_CORRIDOR,
+): { rows: Row[]; skipped: string[] } {
+  const corridor = findCorridor(corridorId);
+  if (!corridor) throw new Error(`Noma'lum koridor: ${corridorId}`);
   const raw = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
     header: 1,
     range: 3, // 4-qator sarlavha
@@ -89,11 +99,17 @@ export function extractRows(sheet: XLSX.WorkSheet): { rows: Row[]; skipped: stri
       skipped.push(`${lineNo}-qator: sana o'qilmadi`);
       return;
     }
+    // Jadvalda major birliklar yoziladi (8 540 000 so'm), server minor kutadi
+    // (854 000 000 tiyin). Konversiya shu yerda, valyuta kasriga ko'ra.
+    const sendF = Number(minorFactor(corridor.sendCurrency));
+    const recvF = Number(minorFactor(corridor.recvCurrency));
+
     rows.push({
       providerSlug: slug,
-      sendMinor: String(Math.round(sent)),
-      feeMinor: String(Math.round(toNumber(r[3]) ?? 0)),
-      recvMinor: String(Math.round(recv)),
+      corridorId,
+      sendMinor: String(Math.round(sent * sendF)),
+      feeMinor: String(Math.round((toNumber(r[3]) ?? 0) * sendF)),
+      recvMinor: String(Math.round(recv * recvF)),
       recvBank: r[6] ? String(r[6]) : undefined,
       etaMinutes: r[7] != null ? Math.round((toNumber(r[7]) ?? 0) * 60) : undefined,
       isPromotional: /ha|yes|ha'/i.test(String(r[8] ?? '')),
@@ -107,8 +123,15 @@ export function extractRows(sheet: XLSX.WorkSheet): { rows: Row[]; skipped: stri
 async function main(): Promise<void> {
   const file = process.argv[2];
   const dry = process.argv.includes('--dry');
+  const corrIdx = process.argv.indexOf('--corridor');
+  const corridorId =
+    corrIdx !== -1 && process.argv[corrIdx + 1]
+      ? process.argv[corrIdx + 1].toUpperCase()
+      : DEFAULT_CORRIDOR;
   if (!file) {
-    console.error('Foydalanish: ts-node tools/import-xlsx.ts <fayl.xlsx> [--dry]');
+    console.error(
+      'Foydalanish: ts-node tools/import-xlsx.ts <fayl.xlsx> [--corridor KR-UZ] [--dry]',
+    );
     process.exit(1);
   }
   const abs = path.resolve(file);
@@ -123,15 +146,19 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  const { rows, skipped } = extractRows(wb.Sheets[SHEET]);
+  const { rows, skipped } = extractRows(wb.Sheets[SHEET], corridorId);
+  console.log(`Koridor: ${corridorId}`);
 
   skipped.forEach((s) => console.warn(`  ⚠ ${s}`));
   console.log(`O'qildi: ${rows.length} qator`);
+  const c = findCorridor(corridorId)!;
   rows.forEach((r) => {
-    const rate = Number(r.recvMinor) / Number(r.sendMinor);
+    const sendMajor = Number(r.sendMinor) / Number(minorFactor(c.sendCurrency));
+    const recvMajor = Number(r.recvMinor) / Number(minorFactor(c.recvCurrency));
+    const rate = sendMajor === 0 ? 0 : recvMajor / sendMajor;
     console.log(
-      `  ${r.providerSlug.padEnd(12)} ${Number(r.recvMinor).toLocaleString('ru-RU')} so'm` +
-        `  (kurs ${rate.toFixed(4)})${r.isPromotional ? '  [promo]' : ''}`,
+      `  ${r.providerSlug.padEnd(12)} ${formatMinor(BigInt(r.recvMinor), c.recvCurrency)} ` +
+        `${c.recvCurrency}  (kurs ${rate.toFixed(4)})${r.isPromotional ? '  [promo]' : ''}`,
     );
   });
 

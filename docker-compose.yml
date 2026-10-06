@@ -2,13 +2,13 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: remit
-      POSTGRES_PASSWORD: remit
-      POSTGRES_DB: remit
+      POSTGRES_USER: chiroq
+      POSTGRES_PASSWORD: chiroq
+      POSTGRES_DB: chiroq
     ports: ["5432:5432"]
     volumes: ["pgdata:/var/lib/postgresql/data"]
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U remit"]
+      test: ["CMD-SHELL", "pg_isready -U chiroq"]
       interval: 5s
       timeout: 5s
       retries: 10

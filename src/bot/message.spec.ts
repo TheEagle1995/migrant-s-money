@@ -1,39 +1,62 @@
-import { renderDailyPost } from './message';
+import { renderDailyPost, renderMultiCorridorPost, renderAlert } from './message';
 import { buildComparison } from '../rates/comparison.service';
-import { Provider, Quote } from '../domain/types';
+import { provider, quote, KR_UZ, RU_UZ } from '../testing/fixtures';
+import { toMinor } from '../domain/currency';
 
 const NOW = new Date('2026-08-24T12:00:00Z');
-const p = (slug: string, name: string): Provider => ({
-  id: `p-${slug}`, slug, displayName: name, kind: 'BANK_APP',
-  isLicensed: true, affiliateActive: false, isActive: true,
-});
-const q = (slug: string, recv: bigint, extra: Partial<Quote> = {}): Quote => ({
-  id: 1n, providerId: `p-${slug}`, sendCurrency: 'KRW', recvCurrency: 'UZS',
-  sendMinor: 1_000_000n, feeMinor: 0n, rate: '8.5', recvMinor: recv, recvBank: null,
-  payoutMethod: 'CARD', etaMinutes: 60, isPromotional: false,
-  fetchedAt: new Date(NOW.getTime() - 3600_000), source: 'MANUAL', ...extra,
-});
+const ago = (h: number) => new Date(NOW.getTime() - h * 3600_000);
+
+const korea = () => buildComparison(
+  KR_UZ,
+  [provider('toss', { displayName: 'Toss' }), provider('sentbe', { displayName: 'Sentbe' }), provider('gme', { displayName: 'GME' })],
+  [
+    quote('toss', 8_540_000, { fetchedAt: ago(1) }),
+    quote('sentbe', 8_465_000, { fetchedAt: ago(1) }),
+    quote('gme', 8_310_000, { fetchedAt: ago(1) }),
+  ],
+  NOW,
+);
+
+const russia = () => buildComparison(
+  RU_UZ,
+  [provider('korona', { displayName: 'Korona Pay', countries: ['RU'] }), provider('unistream', { displayName: 'Unistream', countries: ['RU'] })],
+  [
+    quote('korona', 7_500_000, { corridor: RU_UZ, fetchedAt: ago(1) }),
+    quote('unistream', 7_300_000, { corridor: RU_UZ, fetchedAt: ago(1) }),
+  ],
+  NOW,
+);
 
 describe('renderDailyPost', () => {
   it('kanallarni tartibda va farq foizi bilan chiqaradi', () => {
-    const r = buildComparison(
-      [p('toss', 'Toss'), p('sentbe', 'Sentbe'), p('gme', 'GME')],
-      [q('toss', 8_540_000n), q('sentbe', 8_465_000n), q('gme', 8_310_000n)],
-      NOW,
-    );
-    const out = renderDailyPost(r, NOW);
+    const out = renderDailyPost(korea(), NOW);
     expect(out).toContain('🥇 *Toss* — 8 540 000');
     expect(out).toContain('🥈 *Sentbe*');
     expect(out.indexOf('Toss')).toBeLessThan(out.indexOf('GME'));
-    expect(out).toContain('2.7%'); // GME farqi
-    expect(out).toContain('Yiliga 12 o\'tkazmada');
+    expect(out).toContain('2.7%');
+  });
+
+  it('koridorni sarlavhada aytadi', () => {
+    const out = renderDailyPost(korea(), NOW);
+    expect(out).toContain("Koreya → O'zbekiston");
+    expect(out).toContain('🇰🇷🇺🇿');
+    expect(out).toContain('1,000,000 ₩');
+  });
+
+  it('Rossiya koridorini o\'z valyutasi bilan chiqaradi', () => {
+    const out = renderDailyPost(russia(), NOW);
+    expect(out).toContain("Rossiya → O'zbekiston");
+    expect(out).toContain('50 000 ₽');
+    expect(out).toContain('🥇 *Korona Pay*');
   });
 
   it('promo va eskirgan belgilarni ko\'rsatadi', () => {
-    const old = new Date(NOW.getTime() - 9 * 3600_000);
     const r = buildComparison(
-      [p('a', 'A'), p('b', 'B')],
-      [q('a', 8_500_000n, { isPromotional: true }), q('b', 8_100_000n, { fetchedAt: old })],
+      KR_UZ, [provider('a'), provider('b')],
+      [
+        quote('a', 8_500_000, { isPromotional: true, fetchedAt: ago(1) }),
+        quote('b', 8_100_000, { fetchedAt: ago(9) }),
+      ],
       NOW,
     );
     const out = renderDailyPost(r, NOW);
@@ -41,13 +64,42 @@ describe('renderDailyPost', () => {
     expect(out).toContain('soat oldin');
   });
 
-  it('ma\'lumot bo\'lmasa yiqilmaydi', () => {
-    const r = buildComparison([], [], NOW);
-    expect(renderDailyPost(r, NOW)).toContain("ma'lumot yig'ilmadi");
+  it('ma\'lumot bo\'lmasa koridorni baribir aytadi', () => {
+    const out = renderDailyPost(buildComparison(KR_UZ, [], [], NOW), NOW);
+    expect(out).toContain("o'lchov kiritilmagan");
+    expect(out).toContain("Koreya → O'zbekiston");
   });
 
   it('neytrallik izohini har doim qo\'shadi', () => {
-    const r = buildComparison([p('a', 'A')], [q('a', 8_500_000n)], NOW);
-    expect(renderDailyPost(r, NOW)).toContain('Reklama o\'rni sotilmaydi');
+    expect(renderDailyPost(korea(), NOW)).toContain("Reklama o'rni sotilmaydi");
+  });
+});
+
+describe('renderMultiCorridorPost', () => {
+  it('bir nechta koridorni bitta postda beradi', () => {
+    const out = renderMultiCorridorPost([korea(), russia()], NOW);
+    expect(out).toContain('🇰🇷🇺🇿');
+    expect(out).toContain('🇷🇺🇺🇿');
+    expect(out).toContain('Toss');
+    expect(out).toContain('Korona Pay');
+  });
+
+  it('bo\'sh koridorlarni tashlab ketadi', () => {
+    const out = renderMultiCorridorPost([korea(), buildComparison(RU_UZ, [], [], NOW)], NOW);
+    expect(out).toContain('🇰🇷🇺🇿');
+    expect(out).not.toContain('🇷🇺🇺🇿');
+  });
+
+  it('hech narsa bo\'lmasa yiqilmaydi', () => {
+    expect(renderMultiCorridorPost([], NOW)).toContain("ma'lumot yig'ilmadi");
+  });
+});
+
+describe('renderAlert', () => {
+  it('koridorni va summani ko\'rsatadi', () => {
+    const out = renderAlert('Toss', toMinor(8_600_000, 'UZS'), toMinor(8_500_000, 'UZS'), 'KR-UZ');
+    expect(out).toContain('Toss');
+    expect(out).toContain('8 600 000');
+    expect(out).toContain('KR-UZ');
   });
 });

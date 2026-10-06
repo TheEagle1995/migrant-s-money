@@ -1,4 +1,4 @@
-package uz.remit
+package uz.chiroq
 
 import android.content.BroadcastReceiver
 import android.content.Context

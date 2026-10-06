@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 /// Kanal FAQAT xom matnni Dart tomoniga uzatadi. Parsing shu yerda, qurilmada
 /// bajariladi va serverga faqat strukturalangan natija ketadi.
 class SmsChannel {
-  static const _events = EventChannel('uz.remit/sms');
-  static const _methods = MethodChannel('uz.remit/sms_control');
+  static const _events = EventChannel('uz.chiroq/sms');
+  static const _methods = MethodChannel('uz.chiroq/sms_control');
 
   /// Har bir element: {sender, body, receivedAt}
   static Stream<SmsMessage> stream() => _events

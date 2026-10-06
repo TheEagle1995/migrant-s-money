@@ -1,7 +1,9 @@
 import { InboundEvent, Transfer, TransferStatus } from '../domain/types';
+import { CurrencyCode } from '../domain/currency';
 
 export interface NewInboundEvent {
   householdId: string;
+  currency: CurrencyCode;
   amountMinor: bigint;
   kind: 'CREDIT' | 'DEBIT';
   bankSlug: string;

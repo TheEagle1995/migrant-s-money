@@ -82,6 +82,11 @@ describe('deviationOf', () => {
 
 describe('observedRate', () => {
   it('haqiqiy kursni hisoblaydi', () => {
-    expect(observedRate(1_000_000n, 8_520_000n)).toBe('8.5200000000');
+    // Valyuta kasrlari hisobga olinadi: KRW kasrsiz, UZS ikki kasrli
+    expect(observedRate(1_000_000n, 852_000_000n, 'KRW', 'UZS')).toBe('8.5200000000');
+  });
+
+  it('RUB -> UZS kursini to\'g\'ri beradi', () => {
+    expect(observedRate(5_000_000n, 750_000_000n, 'RUB', 'UZS')).toBe('150.0000000000');
   });
 });

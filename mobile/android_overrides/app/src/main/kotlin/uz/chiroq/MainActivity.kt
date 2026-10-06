@@ -1,4 +1,4 @@
-package uz.remit
+package uz.chiroq
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -9,8 +9,8 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
-private const val EVENTS = "uz.remit/sms"
-private const val CONTROL = "uz.remit/sms_control"
+private const val EVENTS = "uz.chiroq/sms"
+private const val CONTROL = "uz.chiroq/sms_control"
 private const val REQ_SMS = 4417
 
 class MainActivity : FlutterActivity() {

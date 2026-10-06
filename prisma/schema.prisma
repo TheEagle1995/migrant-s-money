@@ -14,15 +14,36 @@ datasource db {
 
 enum ProviderKind {
   SMALL_REMITTANCE // 소액해외송금업자 (Sentbe, Hanpass, GME, Cross)
-  BANK_APP // Toss, Kakao
+  BANK_APP // Toss, Kakao, Kaspi
   BANK // an'anaviy bank o'tkazmasi
+  WALLET // Korona Pay, Unistream kabi pul o'tkazma tizimlari
+}
+
+/// Bank — SMS parsing uchun. Ilgari bu ro'yxat uchta joyda (TypeScript, Dart,
+/// Kotlin) qattiq yozilgan edi: Rossiya bankini qo'shish uchun uchta faylni
+/// tahrirlab, ilovani qaytadan chiqarish kerak bo'lardi. Endi ma'lumot.
+model Bank {
+  id         String   @id @default(cuid())
+  /// ISO 3166-1 alpha-2: "UZ", "RU", "KZ"
+  country    String
+  slug       String   @unique
+  name       String
+  /// SMS jo'natuvchi nomlari. Raqamli ham bo'ladi (Sberbank: "900").
+  smsSenders String[]
+  isActive   Boolean  @default(true)
+
+  @@index([country, isActive])
+  @@map("banks")
 }
 
 model Provider {
   id          String       @id @default(cuid())
-  slug        String       @unique // "toss", "sentbe", "hanpass"
+  slug        String       @unique // "toss", "sentbe", "korona"
   displayName String
   kind        ProviderKind
+  /// Qaysi davlatlardan yuborish mumkin: ["KR"], ["RU","KZ"]
+  /// Sentbe (Koreya) va Korona (Rossiya) bitta ro'yxatda chiqmasligi uchun.
+  sendCountries String[]
   isLicensed  Boolean      @default(true) // 기획재정부 ro'yxatida bormi
   homepageUrl String?
   // affiliate holati — ranking'ga TA'SIR QILMAYDI, faqat hisobot uchun
@@ -43,9 +64,12 @@ model Quote {
   providerId String
   provider   Provider @relation(fields: [providerId], references: [id])
 
-  sendCurrency String // "KRW"
+  /// "KR-UZ" — koridor yozuvning bir qismi, filtrlash va indeks shu bo'yicha
+  corridorId   String
+  sendCurrency String // "KRW", "RUB", "KZT"
   recvCurrency String // "UZS"
-  /// Minor unitda. KRW uchun butun won, UZS uchun butun so'm (tiyin yo'q).
+  /// Minor unitda, valyutaning ISO 4217 kasriga ko'ra.
+  /// KRW kasrsiz, UZS va RUB ikki kasrli — shuning uchun kopeyka yo'qolmaydi.
   sendMinor    BigInt
   feeMinor     BigInt  @default(0)
   rate         Decimal @db.Decimal(24, 10)
@@ -64,8 +88,8 @@ model Quote {
   runId     String?
   run       FetchRun?   @relation(fields: [runId], references: [id])
 
-  @@index([sendCurrency, recvCurrency, fetchedAt(sort: Desc)])
-  @@index([providerId, fetchedAt(sort: Desc)])
+  @@index([corridorId, fetchedAt(sort: Desc)])
+  @@index([providerId, corridorId, fetchedAt(sort: Desc)])
   @@map("quotes")
 }
 
@@ -148,6 +172,7 @@ model Transfer {
   id          String    @id @default(cuid())
   householdId String
   household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  corridorId  String
   providerId  String?
   provider    Provider? @relation(fields: [providerId], references: [id])
 
@@ -177,7 +202,9 @@ model InboundEvent {
   householdId String
   household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
 
-  amountMinor BigInt // UZS
+  /// Hodisa valyutasi — qabul qiluvchi bir nechta davlatda bo'lishi mumkin
+  currency    String
+  amountMinor BigInt
   kind        EventKind
   bankSlug    String
   cardLast4   String?
@@ -256,7 +283,7 @@ model AlertSubscription {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  @@index([isActive])
+  @@index([isActive, corridorId])
   @@index([chatId])
   @@map("alert_subscriptions")
 }
@@ -265,6 +292,8 @@ model AlertSubscription {
 model AlertSubscription {
   id                  String   @id @default(cuid())
   chatId              String
+  /// Qaysi koridor kuzatilmoqda: "KR-UZ"
+  corridorId          String
   /// 1 mln KRW uchun so'm. Shundan oshsa xabar yuboriladi.
   thresholdMinor      BigInt
   /// null = har qanday kanal
@@ -274,7 +303,7 @@ model AlertSubscription {
   isActive            Boolean  @default(true)
   createdAt           DateTime @default(now())
 
-  @@index([isActive])
+  @@index([isActive, corridorId])
   @@index([chatId])
   @@map("alert_subscriptions")
 }

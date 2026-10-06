@@ -2,7 +2,7 @@ name: Android APK
 
 # APK'ni GitHub quradi — lokal Flutter/Android SDK kerak emas.
 # Ishga tushirish: Actions -> Android APK -> Run workflow
-# Natija: "Artifacts" bo'limida remit-apk.zip
+# Natija: "Artifacts" bo'limida chiroq-apk.zip
 
 on:
   workflow_dispatch:
@@ -48,7 +48,7 @@ jobs:
         run: |
           cp pubspec.yaml /tmp/pubspec.yaml.bak
           cp -r lib /tmp/lib.bak
-          flutter create --platforms=android --org uz.remit --project-name remit .
+          flutter create --platforms=android --org uz.chiroq --project-name chiroq .
           cp /tmp/pubspec.yaml.bak pubspec.yaml
           rm -rf lib && cp -r /tmp/lib.bak lib
           echo "--- pubspec tiklandi:"
@@ -84,11 +84,11 @@ jobs:
         run: |
           mkdir -p out
           cp build/app/outputs/flutter-apk/app-release.apk \
-             out/remit-$(date +%Y%m%d)-${GITHUB_SHA::7}.apk
+             out/chiroq-$(date +%Y%m%d)-${GITHUB_SHA::7}.apk
           ls -lh out/
 
       - uses: actions/upload-artifact@v4
         with:
-          name: remit-apk
+          name: chiroq-apk
           path: mobile/out/*.apk
           retention-days: 30

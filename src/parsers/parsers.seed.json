@@ -4,7 +4,6 @@
     "version": 1,
     "pattern": "(?<card>\\d{4})\\s*[:.]?\\s*(?<kind>Popolnenie|Popolneniye|Oplata|Snyatie|Perevod)\\s*[:.]?\\s*(?<amt>[\\d\\s.,]+)\\s*(?:UZS|sum|so'm)(?:\\s*(?<merchant>[^\\n]{2,40}))?",
     "amountGroup": "amt",
-    "decimalSeparator": ",",
     "kindMap": {
       "popolnenie": "CREDIT",
       "popolneniye": "CREDIT",
@@ -14,11 +13,55 @@
     }
   },
   {
+    "bankSlug": "humo",
+    "version": 1,
+    "pattern": "(?:HUMO|Humo).*?(?<kind>Popolnenie|Oplata)\\s*(?<amt>[\\d\\s.,]+)\\s*(?:UZS|sum)",
+    "amountGroup": "amt",
+    "kindMap": { "popolnenie": "CREDIT", "oplata": "DEBIT" }
+  },
+  {
     "bankSlug": "uzcard",
     "version": 1,
-    "pattern": "HUMO|UZCARD.*?(?<kind>Popolnenie|Oplata)\\s*(?<amt>[\\d\\s.,]+)\\s*(?:UZS|sum)",
+    "pattern": "(?:UZCARD|Uzcard).*?(?<kind>Popolnenie|Oplata)\\s*(?<amt>[\\d\\s.,]+)\\s*(?:UZS|sum)",
     "amountGroup": "amt",
-    "decimalSeparator": ",",
     "kindMap": { "popolnenie": "CREDIT", "oplata": "DEBIT" }
+  },
+  {
+    "bankSlug": "sber",
+    "version": 1,
+    "pattern": "(?<card>\\d{4})?.*?(?<kind>зачисление|перевод|списание|оплата|покупка)\\s*(?<amt>[\\d\\s.,]+)\\s*(?:р|руб|RUB|₽)",
+    "amountGroup": "amt",
+    "kindMap": {
+      "зачисление": "CREDIT",
+      "перевод": "CREDIT",
+      "списание": "DEBIT",
+      "оплата": "DEBIT",
+      "покупка": "DEBIT"
+    }
+  },
+  {
+    "bankSlug": "tbank",
+    "version": 1,
+    "pattern": "(?<kind>Пополнение|Перевод|Оплата|Покупка|Снятие)\\.?\\s*(?<amt>[\\d\\s.,]+)\\s*(?:р|руб|RUB|₽)",
+    "amountGroup": "amt",
+    "kindMap": {
+      "пополнение": "CREDIT",
+      "перевод": "CREDIT",
+      "оплата": "DEBIT",
+      "покупка": "DEBIT",
+      "снятие": "DEBIT"
+    }
+  },
+  {
+    "bankSlug": "kaspi",
+    "version": 1,
+    "pattern": "(?<kind>Popolnenie|Пополнение|Oplata|Оплата)\\s*(?<amt>[\\d\\s.,]+)\\s*(?:KZT|тг|₸)",
+    "amountGroup": "amt",
+    "kindMap": {
+      "popolnenie": "CREDIT",
+      "пополнение": "CREDIT",
+      "oplata": "DEBIT",
+      "оплата": "DEBIT"
+    }
   }
 ]

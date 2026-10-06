@@ -33,6 +33,7 @@ export class MemQuoteRepo implements QuoteRepository {
     this.items.push({
       id: this.seq++,
       providerId: q.providerId,
+      corridorId: q.corridorId,
       sendCurrency: q.sendCurrency,
       recvCurrency: q.recvCurrency,
       sendMinor: q.sendMinor,
@@ -48,10 +49,10 @@ export class MemQuoteRepo implements QuoteRepository {
     });
   }
 
-  async latestPerProvider(send: 'KRW', recv: 'UZS'): Promise<Quote[]> {
+  async latestPerProvider(corridorId: string): Promise<Quote[]> {
     const best = new Map<string, Quote>();
     for (const q of this.items) {
-      if (q.sendCurrency !== send || q.recvCurrency !== recv) continue;
+      if (q.corridorId !== corridorId) continue;
       const cur = best.get(q.providerId);
       if (!cur || q.fetchedAt > cur.fetchedAt) best.set(q.providerId, q);
     }
@@ -131,6 +132,7 @@ export class MemEventRepo implements InboundEventRepository {
     const created: InboundEvent = {
       id: randomUUID(),
       householdId: e.householdId,
+      currency: e.currency,
       amountMinor: e.amountMinor,
       kind: e.kind,
       bankSlug: e.bankSlug,

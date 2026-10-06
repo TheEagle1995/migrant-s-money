@@ -1,0 +1,30 @@
+[
+  { "country": "UZ", "slug": "kapital",      "name": "Kapitalbank",     "smsSenders": ["kapitalbank", "kapital24", "kapitalbk"] },
+  { "country": "UZ", "slug": "ipoteka",      "name": "Ipoteka Bank",    "smsSenders": ["ipotekabank", "ipoteka"] },
+  { "country": "UZ", "slug": "hamkor",       "name": "Hamkorbank",      "smsSenders": ["hamkorbank", "hamkor"] },
+  { "country": "UZ", "slug": "asia-alliance","name": "Asia Alliance",   "smsSenders": ["aab", "asiaalliance"] },
+  { "country": "UZ", "slug": "agrobank",     "name": "Agrobank",        "smsSenders": ["agrobank"] },
+  { "country": "UZ", "slug": "infin",        "name": "Infinbank",       "smsSenders": ["infinbank", "infin"] },
+  { "country": "UZ", "slug": "tbc-uz",       "name": "TBC Bank UZ",     "smsSenders": ["tbcbank", "tbcuz"] },
+  { "country": "UZ", "slug": "anor",         "name": "Anor Bank",       "smsSenders": ["anorbank", "anor"] },
+  { "country": "UZ", "slug": "uzum",         "name": "Uzum Bank",       "smsSenders": ["uzumbank", "uzum"] },
+  { "country": "UZ", "slug": "uzcard",       "name": "Uzcard",          "smsSenders": ["uzcard"] },
+  { "country": "UZ", "slug": "humo",         "name": "Humo",            "smsSenders": ["humo", "humocard"] },
+
+  { "country": "RU", "slug": "sber",         "name": "Sberbank",        "smsSenders": ["900", "sberbank", "sber"] },
+  { "country": "RU", "slug": "tbank",        "name": "T-Bank",          "smsSenders": ["tbank", "tinkoff"] },
+  { "country": "RU", "slug": "alfa",         "name": "Alfa-Bank",       "smsSenders": ["alfabank", "alfa"] },
+  { "country": "RU", "slug": "vtb",          "name": "VTB",             "smsSenders": ["vtb"] },
+  { "country": "RU", "slug": "ozon",         "name": "Ozon Bank",       "smsSenders": ["ozonbank", "ozon"] },
+
+  { "country": "KZ", "slug": "kaspi",        "name": "Kaspi Bank",      "smsSenders": ["kaspi", "kaspibank"] },
+  { "country": "KZ", "slug": "halyk",        "name": "Halyk Bank",      "smsSenders": ["halyk", "halykbank"] },
+  { "country": "KZ", "slug": "freedom-kz",   "name": "Freedom Bank KZ", "smsSenders": ["freedom", "freedombank"] },
+
+  { "country": "KG", "slug": "optima",       "name": "Optima Bank",     "smsSenders": ["optima", "optimabank"] },
+  { "country": "KG", "slug": "mbank",        "name": "MBANK",           "smsSenders": ["mbank"] },
+
+  { "country": "TJ", "slug": "amonat",       "name": "Amonatbank",      "smsSenders": ["amonatbank", "amonat"] },
+  { "country": "TJ", "slug": "alif",         "name": "Alif Bank",       "smsSenders": ["alif", "alifbank"] },
+  { "country": "TJ", "slug": "eskhata",      "name": "Eskhata Bank",    "smsSenders": ["eskhata"] }
+]

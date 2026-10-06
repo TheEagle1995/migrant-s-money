@@ -9,6 +9,7 @@ import {
 import { RunStatus } from '../domain/types';
 
 export const DEFAULT_REQUEST: QuoteRequest = {
+  corridorId: 'KR-UZ',
   sendCurrency: 'KRW',
   recvCurrency: 'UZS',
   sendMinor: 1_000_000n,
@@ -50,6 +51,7 @@ export class RatesRunner {
       const raw = await withRetry(() => adapter.fetchQuote(req), 3);
       await this.quotes.create({
         providerId: provider.id,
+        corridorId: req.corridorId,
         sendCurrency: req.sendCurrency,
         recvCurrency: req.recvCurrency,
         sendMinor: raw.sendMinor,

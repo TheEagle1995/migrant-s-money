@@ -1,3 +1,5 @@
+import { CurrencyCode } from '../domain/currency';
+import { effectiveRate } from '../domain/money';
 /**
  * Transfer <-> InboundEvent moslashtirish.
  *
@@ -113,7 +115,11 @@ export function deviationOf(actual: bigint, expected: bigint): number {
  * Tasdiqlangan moslikdan haqiqiy kurs. Bu `OBSERVED` Quote bo'lib yoziladi —
  * reklama qilingan emas, real qo'lga tekkan kurs.
  */
-export function observedRate(sentMinorKrw: bigint, recvMinorUzs: bigint): string {
-  if (sentMinorKrw === 0n) return '0';
-  return (Number(recvMinorUzs) / Number(sentMinorKrw)).toFixed(10);
+export function observedRate(
+  sentMinor: bigint,
+  recvMinor: bigint,
+  sendCurrency: CurrencyCode,
+  recvCurrency: CurrencyCode,
+): string {
+  return effectiveRate(recvMinor, sentMinor, sendCurrency, recvCurrency);
 }

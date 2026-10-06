@@ -1,17 +1,34 @@
-# Remit — Koreya → O'zbekiston o'tkazma taqqoslash + oilaviy byudjet
+# Chiroq
+
+**Pul o'tkazmalarining yashirin narxini ko'rsatadi.**
+
+Migrant oilalar uchun: qaysi kanal orqali yuborsa, uyga ko'proq pul yetadi —
+va yuborilgan pul maqsadga qancha yig'ilgani.
+
+NestJS + Prisma + PostgreSQL · Telegram bot · Flutter (Android)
 
 **APK olish: [APK.md](APK.md)** — GitHub Actions quradi, lokal SDK kerak emas.
+**Audit: [AUDIT.md](AUDIT.md)** — ko'p davlatga o'tishda topilgan xatolar.
 
-NestJS + Prisma + PostgreSQL backend, Telegram bot, Flutter (Android) klient.
-
-```
+```bash
 npm install
 cp .env.example .env
 docker compose up -d db
 npx prisma generate && npx prisma migrate dev --name init && npm run db:seed
-npm test          # 45 test
+npm test
 npm run start:dev
 ```
+
+---
+
+## Nomi nega Chiroq
+
+Mahsulotning butun tezisi: o'tkazmaning haqiqiy narxi komissiyada emas,
+**kursda yashiringan**. Operatorlar "komissiya 0" deb reklama qiladi, lekin
+pul kursda olinadi. Chiroq shu yashirin narxni yoritadi.
+
+O'zak mintaqada tanish: *chiroq* (o'zbek, tojik), *чырак* (qirg'iz),
+*шырақ* (qozoq).
 
 ---
 
@@ -19,135 +36,133 @@ npm run start:dev
 
 | Qism | Holat |
 |---|---|
-| Domen modeli (Prisma schema) | ✅ tayyor |
-| Taqqoslash va reyting mantig'i | ✅ tayyor, 11 test |
-| Moslashtirish (Transfer ↔ SMS) | ✅ tayyor, 11 test |
-| SMS parser + versiyalangan shablonlar | ✅ tayyor, 9 test |
-| Pul arifmetikasi (BigInt) | ✅ tayyor, 5 test |
-| Telegram post rendering | ✅ tayyor, 4 test |
-| Import validatsiyasi | ✅ tayyor, 5 test |
-| Maqsadlar (Goal) — progress, oylik hisob | ✅ tayyor, 6 test |
-| Kurs ogohlantirishlari (Telegram) | ✅ tayyor, 9 test |
-| **To'liq oqim integratsiya testi** | ✅ **12 test — import→taqqoslash→SMS→OBSERVED→tasdiqlash** |
-| HTTP API (Nest controllers) | ✅ yozilgan, typecheck toza |
-| Prisma repozitoriylari | ✅ yozilgan, `prisma generate` kerak |
-| xlsx import CLI | ✅ ishlaydi (real jadval bilan sinaldi) |
-| Flutter klient + SMS pipeline | ⚠️ yozilgan, **kompilyatsiya qilinmagan** |
-| Android receiver + Manifest + MainActivity | ⚠️ yozilgan, **qurilmada sinalmagan** |
+| Valyuta qatlami (ISO 4217 kasrlari) | ✅ 23 test |
+| Koridor registri (10 koridor, 7 faol) | ✅ |
+| Taqqoslash va reyting | ✅ 13 test |
+| Moslashtirish (Transfer ↔ SMS) | ✅ 11 test |
+| SMS parser — 24 bank, 6 davlat | ✅ 22 test |
+| Maqsadlar | ✅ 6 test |
+| Kurs ogohlantirishlari | ✅ 14 test |
+| To'liq oqim integratsiyasi | ✅ 15 test |
+| Telegram bot (ko'p koridor) | ✅ 10 test |
+| HTTP API | ✅ typecheck toza |
+| Prisma repozitoriylari | ✅ `prisma generate` kerak |
+| xlsx import CLI | ✅ real jadval bilan sinaldi |
+| Flutter klient | ⚠️ kompilyatsiya qilinmagan (SDK yo'q edi) |
+| Android SMS receiver | ⚠️ qurilmada sinalmagan |
 | Avtomatik kurs adapterlari | ❌ **yo'q — sababi quyida** |
 
-`npm test` → **72 ta test** o'tadi. `npx tsc --noEmit` → 0 xato.
+`npm test` → **133 test**. `npx tsc --noEmit` → 0 xato.
+
+---
+
+## Koridorlar
+
+| Koridor | Baza | Sanity oraliq |
+|---|---|---|
+| 🇰🇷 → 🇺🇿 | 1 000 000 KRW | 4–20 so'm |
+| 🇷🇺 → 🇺🇿 | 50 000 RUB | 60–400 |
+| 🇰🇿 → 🇺🇿 | 500 000 KZT | 8–60 |
+| 🇺🇸 → 🇺🇿 | 1 000 USD | 7 000–20 000 |
+| 🇹🇷 → 🇺🇿 | 10 000 TRY | 100–900 |
+| 🇦🇪 → 🇺🇿 | 5 000 AED | 1 800–5 500 |
+| 🇵🇱 → 🇺🇿 | 10 000 PLN | sinalmagan |
+
+Sanity oraliqlar **narx emas** — faqat kiritish xatosini tutish uchun keng
+to'siq. Masalan so'm o'rniga ming so'm yozilsa darhol ushlanadi.
+
+Yangi koridor qo'shish: `src/domain/corridor.ts` ga bitta qator, provayderlarni
+seed'ga, banklarni `banks.seed.json` ga. Kodning boshqa hech bir joyi
+tegilmaydi — audit shuni ta'minlash uchun qilingan.
 
 ---
 
 ## Nima uchun avtomatik adapter yo'q
 
-Toss, Sentbe, Hanpass, GME, Cross — hammasi kursni faqat ilova ichida, login va
+Toss, Sentbe, Hanpass, GME — hammasi kursni faqat ilova ichida, login va
 외국인등록증 tekshiruvidan keyin ko'rsatadi. Ochiq HTTP endpoint topilmadi.
 
-Shuning uchun `PROVIDER_ADAPTERS` bo'sh massiv, va ma'lumot `ManualImportService`
-orqali kiradi — lekin `Quote` shakli avtomatik adapterlar bilan **bir xil**.
-Faza 1 ga o'tganda hech narsa ko'chirilmaydi, faqat massivga adapter qo'shiladi.
+`PROVIDER_ADAPTERS` bo'sh massiv, ma'lumot `ManualImportService` orqali kiradi —
+lekin `Quote` shakli avtomatik adapterlar bilan **bir xil**, ya'ni adapter
+paydo bo'lganda faqat massivga qo'shiladi.
 
-Huquqiy jihatdan toza yagona rasmiy manba: **portal.kfb.or.kr** (은행연합회
-소비자포털) — banklar komissiya va kurslarini u yerda rasman e'lon qiladi.
-Faqat banklarni qoplaydi, 소액송금업체 larni emas. `QuoteSource.OFFICIAL`.
+Huquqiy jihatdan toza rasmiy manba: **portal.kfb.or.kr** (은행연합회 소비자포털) —
+banklar komissiya va kurslarini u yerda rasman e'lon qiladi. Faqat banklarni
+qoplaydi, 소액송금업체 larni emas. `QuoteSource.OFFICIAL`.
 
 ## Ish oqimi (Faza 0)
 
 ```
 otkazma-olchov.xlsx to'ldiriladi
         ↓
-npx ts-node tools/import-xlsx.ts ./otkazma-olchov.xlsx --dry   # tekshirish
-npx ts-node tools/import-xlsx.ts ./otkazma-olchov.xlsx          # yuklash
+npx ts-node tools/import-xlsx.ts ./otkazma-olchov.xlsx --corridor KR-UZ --dry
+npx ts-node tools/import-xlsx.ts ./otkazma-olchov.xlsx --corridor KR-UZ
         ↓
 GET /rates/compare  →  Telegram kunlik post (08:00 Seul)
 ```
 
-CLI birlik xatolarini tutadi: kurs 4–20 oralig'idan chiqsa qatorni rad etadi
-(masalan so'm o'rniga ming so'm yozilgan bo'lsa).
+CLI jadvaldagi major qiymatni valyuta kasriga ko'ra minorga o'tkazadi va
+koridor oralig'idan chiqqan qatorni rad etadi.
 
 ---
 
 ## Asosiy dizayn qarorlari
 
-**Domen Prisma'dan mustaqil.** Repozitoriy portlari (`PROVIDER_REPO`, `QUOTE_REPO`,
-`TRANSFER_REPO`, …) orqali. Shu sababli mantiq DB'siz test qilinadi va Prisma
-adapter sifatida almashtiriladi.
+**Domen Prisma'dan mustaqil.** Repozitoriy portlari orqali — mantiq DB'siz
+test qilinadi, Prisma adapter sifatida almashtiriladi.
 
 **`Quote` append-only.** `QuoteRepository` da `update` metodi ataylab yo'q.
 Joriy kurs = `DISTINCT ON (providerId) ... ORDER BY fetchedAt DESC`.
 
-**Pul — BigInt minor unit.** `Money` tipi valyutani ham olib yuradi;
-turli valyutalarni qo'shish runtime'da xato beradi (testda tasdiqlangan).
+**Pul — BigInt minor unit + valyuta kodi.** Har bir valyuta o'z ISO 4217
+kasriga ega. Turli valyutalarni qo'shish runtime'da yiqiladi.
 
 **Ranking faqat qo'lga tekkan summa bo'yicha.** `Provider.affiliateActive`
 maydoni bor, lekin `buildComparison()` da ishlatilmaydi — bunga alohida test
-yozilgan (`affiliate provayderni yuqoriga ko'tarmaydi`).
+yozilgan. Bir marta jamoada "falonchi yaxshi to'laydi, uni birinchi qo'ygan"
+degan gap tarqalsa, Telegram guruhlaridagi obro' bir kunda tugaydi — va butun
+distribusiya o'sha guruhlarda.
 
 **Eskirgan kotirovka yashirilmaydi.** 6 soatdan eski bo'lsa `isStale` va
-`staleHours` bilan qaytadi; UI'da "9 soat oldin" deb ko'rsatiladi.
+`staleHours` bilan qaytadi. Jim eskirgan raqam ishonchni bir marta va butunlay
+o'ldiradi.
 
 **Moslashtirish deterministik.** Bir nechta nomzod yoki past parser ishonchi →
-`ASK_USER`. Avtomatik bog'lash faqat bitta kuchli nomzod bo'lganda.
-Har bir tasdiqlangan moslik `QuoteSource.OBSERVED` bo'lib yoziladi — bu
-reklama qilingan emas, **real qo'lga tekkan** kurs, va scraping bilan
-takrorlanmaydi.
+`ASK_USER`. Har bir tasdiqlangan moslik `QuoteSource.OBSERVED` bo'lib yoziladi —
+bu reklama qilingan emas, **real qo'lga tekkan** kurs, va scraping bilan
+takrorlanmaydi. Moat shu.
 
-**Roziliksiz hech narsa qabul qilinmaydi.** `MatchingService.ingest()` avval
-`ConsentRepository.hasSmsConsent()` ni tekshiradi, aks holda 403.
+**Roziliksiz hech narsa qabul qilinmaydi.** `ingest()` avval
+`hasSmsConsent()` ni tekshiradi, aks holda 403.
 
 **Raw SMS serverga chiqmaydi.** Kotlin receiver xom matnni faqat Dart tomoniga
-uzatadi; parsing qurilmada; API'ga `{amount, kind, bank, occurredAt, confidence}`
-ketadi.
+uzatadi; parsing qurilmada; API'ga `{amount, currency, kind, bank, occurredAt,
+confidence}` ketadi.
+
+**Offline navbat.** Bank SMS'i bir marta keladi. Parse natijasi avval diskka
+yoziladi, keyin yuboriladi. 4xx javobda tashlanadi (server hech qachon qabul
+qilmaydi), 5xx da saqlanadi.
 
 ---
 
 ## Sen bajarishing kerak bo'lgan ishlar
 
 1. **Kurslarni o'lchash** — `otkazma-olchov.xlsx`. Buni men qila olmayman.
-   Natija 1% dan kichik bo'lsa `rates` modulini butunlay o'chir va faqat
-   `household` bilan davom et.
+   Natija 1% dan kichik bo'lsa `rates` modulini o'chirib, faqat `household`
+   bilan davom et.
 2. **`prisma generate` + `migrate`** — bu muhitda Prisma engine binarilari
-   bloklangan edi (`binaries.prisma.sh` 403), shuning uchun migratsiya
-   yaratilmagan. Sening mashinangda bir buyruq.
-3. **Real SMS matnlari** — `src/parsers/parsers.seed.json` dagi shablonlar
-   **taxmin**, tekshirilmagan. Kapital/Humo SMS'larini olgach qayta yoz:
-   versiyani oshir, eskisini `isActive` qoldir (fallback sifatida ishlaydi,
-   ishonch pasayadi va foydalanuvchidan tasdiq so'raladi).
-4. **`flutter create .`** — platforma papkalarini generatsiya qiladi.
-   `android/app/src/main/` dagi tayyor `AndroidManifest.xml`, `MainActivity.kt`
-   va `SmsReceiver.kt` fayllarini generatsiyadan keyin qaytarib qo'y
-   (Flutter ularni o'z shablonlari bilan almashtiradi).
-
-5. **Eski `flutter create` eslatmasi** — `mobile/` da faqat `lib/`, `pubspec.yaml` va
-   receiver bor; platforma papkalarini Flutter o'zi generatsiya qiladi.
-   `AndroidManifest.xml` ga `RECEIVE_SMS` va receiver'ni qo'lda qo'shish kerak.
-6. **Play Store deklaratsiyasi** — Manifest'da ataylab faqat `RECEIVE_SMS`
-   so'raladi, `READ_SMS` emas: bizga eski xabarlar kerak emas va kamroq ruxsat
-   tekshiruvni osonlashtiradi. Formada asos sifatida moliyaviy tranzaksiya
-   kuzatuvini yozish va demo video berish kerak.
-7. **Telegram bot tokeni** — `.env` da `TELEGRAM_BOT_TOKEN` va
-   `TELEGRAM_CHANNEL_ID`.
-
-## Integratsiya testi nimani isbotlaydi
-
-`src/matching/flow.integration.spec.ts` — Postgres'siz, lekin **aynan o'sha portlar**
-implementatsiyasi bilan:
-
-1. Jadvaldan import → `Quote` yoziladi
-2. Taqqoslashda affiliate'li provayder yuqoriga chiqmaydi
-3. 500 000 KRW yuborilsa prognoz proporsional hisoblanadi (4 270 000 so'm)
-4. 0.5% farq bilan kelgan SMS avtomatik bog'lanadi
-5. `OBSERVED` kurs yoziladi va keyingi taqqoslashda **ishlatiladi**
-6. Ikkita o'xshash SMS kelsa — bog'lanmaydi, `ASK_USER`
-7. Rozilik yo'q bo'lsa — 403 va hodisa **saqlanmaydi**
-8. Boshqa oilaning hodisasini bog'lash mumkin emas
-9. Birlik xatosi (so'm o'rniga ming so'm) importda tutiladi
+   bloklangan edi (`binaries.prisma.sh` 403).
+3. **Real SMS matnlari** — `parsers.seed.json` dagi shablonlar **taxmin**.
+   Versiyani oshirib qayta yoz, eskisini `isActive` qoldir.
+4. **`flutter create .`** — `mobile/tool/apply_android_overrides.sh` platforma
+   fayllarini qaytaradi.
+5. **Play Store deklaratsiyasi** — Manifest'da ataylab faqat `RECEIVE_SMS`,
+   `READ_SMS` emas.
+6. **Telegram bot tokeni** — `.env` da.
 
 ## Hal qilinmagan strategik savol
 
-Agar Toss chindan mid-market kurs bersa, taqqoslash javobi doim "Toss" bo'ladi
-va `rates` moduli keraksiz. Bu yomon natija emas — byudjet qismi baribir
-kuchliroq g'oya edi, chunki taqqoslash bir martalik qidiruv, byudjet esa har
-oyda takrorlanadi. Birinchi o'lchov shuni hal qiladi.
+Agar Toss chindan mid-market kurs bersa, Koreya koridorida javob doim "Toss"
+bo'ladi va taqqoslash keraksiz. Bu yomon natija emas — byudjet qismi baribir
+kuchliroq g'oya, chunki taqqoslash bir martalik qidiruv, byudjet esa har oyda
+takrorlanadi. Birinchi o'lchov shuni hal qiladi.

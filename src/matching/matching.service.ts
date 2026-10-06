@@ -4,6 +4,7 @@ import {
   NewInboundEvent, TRANSFER_REPO, TransferRepository,
 } from '../household/ports';
 import { QUOTE_REPO, QuoteRepository } from '../rates/ports';
+import { findCorridor } from '../domain/corridor';
 import {
   matchTransfer, MATCH_WINDOW_MS, MatchOutcome, observedRate,
   deviationOf, STRONG_DEVIATION, MAX_DEVIATION,
@@ -66,14 +67,19 @@ export class MatchingService {
 
     await this.transfers.markMatched(transferId, eventId, confirmedBy);
 
-    if (transfer.providerId) {
+    const corridor = findCorridor(transfer.corridorId);
+    if (transfer.providerId && corridor) {
       await this.quotes.create({
         providerId: transfer.providerId,
-        sendCurrency: 'KRW',
-        recvCurrency: 'UZS',
+        corridorId: corridor.id,
+        sendCurrency: corridor.sendCurrency,
+        recvCurrency: corridor.recvCurrency,
         sendMinor: transfer.sentMinor,
         feeMinor: 0n,
-        rate: observedRate(transfer.sentMinor, event.amountMinor),
+        rate: observedRate(
+          transfer.sentMinor, event.amountMinor,
+          corridor.sendCurrency, corridor.recvCurrency,
+        ),
         recvMinor: event.amountMinor,
         isPromotional: false,
         fetchedAt: event.occurredAt,

@@ -16,13 +16,13 @@ talab qilmaydi.
 ```bash
 cd app
 git init && git add -A
-git commit -m "Remit: backend + mobile"
+git commit -m "Chiroq: backend + mobile"
 git remote add origin git@github.com:TheEagle1995/remit.git
 git push -u origin main
 ```
 
 2. GitHub'da: **Actions → Android APK → Run workflow**
-3. 5–8 daqiqadan keyin **Artifacts → remit-apk** — ichida `.apk` fayl
+3. 5–8 daqiqadan keyin **Artifacts → chiroq-apk** — ichida `.apk` fayl
 
 Workflow `android/` papkasini o'zi generatsiya qiladi (`flutter create`), keyin
 bizning `AndroidManifest.xml` va Kotlin fayllarni ustiga qaytaradi. Shuning
