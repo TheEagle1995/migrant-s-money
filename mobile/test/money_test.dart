@@ -1,44 +1,69 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remit/core/money.dart';
+import 'package:chiroq/core/money.dart';
 
 void main() {
-  group('Money', () {
-    test('katta summani probel bilan formatlaydi', () {
-      expect(Money.uzs(BigInt.from(8540000)).formatted, '8 540 000');
-      expect(Money.uzs(BigInt.from(500)).formatted, '500');
-      expect(Money.uzs(BigInt.from(1000)).formatted, '1 000');
+  group('Money — valyuta kasri', () {
+    test('UZS ikki kasrli: tiyindan so\'mga', () {
+      expect(Money(BigInt.from(854000000), 'UZS').formatted, '8 540 000');
+      expect(Money(BigInt.from(854000050), 'UZS').formatted, '8 540 000,50');
     });
 
-    test('so\'m uchun valyuta nomini qo\'shadi', () {
-      expect(Money.uzs(BigInt.from(1000)).display, "1 000 so'm");
-      expect(Money.krw(BigInt.from(1000)).display, '1 000 KRW');
+    test('KRW kasrsiz', () {
+      expect(Money(BigInt.from(1000000), 'KRW').formatted, '1 000 000');
     });
 
-    test('nolni to\'g\'ri ko\'rsatadi', () {
-      expect(Money.uzs(BigInt.zero).formatted, '0');
+    test('RUB kopeykasini ko\'rsatadi', () {
+      expect(Money(BigInt.from(125050), 'RUB').formatted, '1 250,50');
+    });
+
+    test('KWD uch kasrli', () {
+      expect(Money(BigInt.from(1250), 'KWD').decimals, 3);
+      expect(Money(BigInt.from(1250), 'KWD').formatted, '1,250');
+    });
+
+    test('valyuta belgisini qo\'shadi', () {
+      expect(Money(BigInt.from(854000000), 'UZS').display, "8 540 000 so'm");
+      expect(Money(BigInt.from(1000000), 'KRW').display, '1 000 000 ₩');
+    });
+
+    test('noma\'lum valyutada kodni ko\'rsatadi', () {
+      expect(Money(BigInt.from(100), 'XYZ').symbol, 'XYZ');
+    });
+
+    test('manfiy summani belgilaydi', () {
+      expect(Money(BigInt.from(-125050), 'RUB').formatted, '-1 250,50');
+    });
+  });
+
+  group('parseMajor — kiritilgan matndan minor unit', () {
+    test('probel va belgilarni tashlaydi', () {
+      expect(Money.parseMajor('8 540 000', 'UZS'), BigInt.from(854000000));
+      expect(Money.parseMajor('1 000 000', 'KRW'), BigInt.from(1000000));
+    });
+
+    test('kasrsiz valyutada ko\'paytmaydi', () {
+      expect(Money.parseMajor('100000', 'KRW'), BigInt.from(100000));
+    });
+
+    test('bo\'sh va nolni rad etadi', () {
+      expect(Money.parseMajor('', 'UZS'), isNull);
+      expect(Money.parseMajor('0', 'UZS'), isNull);
+      expect(Money.parseMajor('abc', 'UZS'), isNull);
+    });
+
+    test('katta summada aniqlikni yo\'qotmaydi', () {
+      final v = Money.parseMajor('99 999 999 999', 'UZS');
+      expect(v, BigInt.parse('9999999999900'));
     });
   });
 
   group('normalizeTo', () {
-    test('yarim million KRW ni bir millionga keltiradi', () {
-      final r = normalizeTo(BigInt.from(4270000), BigInt.from(500000));
-      expect(r, BigInt.from(8540000));
+    test('bazaga keltiradi', () {
+      expect(normalizeTo(BigInt.from(4270000), BigInt.from(500000), BigInt.from(1000000)),
+          BigInt.from(8540000));
     });
-
-    test('bir millionni o\'zgartirmaydi', () {
-      final r = normalizeTo(BigInt.from(8540000), BigInt.from(1000000));
-      expect(r, BigInt.from(8540000));
-    });
-
-    test('nol yuborishda xato beradi', () {
-      expect(() => normalizeTo(BigInt.one, BigInt.zero), throwsArgumentError);
-    });
-
-    test('BigInt ishlatgani uchun aniqlik yo\'qolmaydi', () {
-      // double bo'lganida bu yerda xato paydo bo'lardi
-      final huge = BigInt.parse('123456789012345678');
-      final r = normalizeTo(huge, BigInt.from(1000000));
-      expect(r, huge);
+    test('nol yuborishda xato', () {
+      expect(() => normalizeTo(BigInt.one, BigInt.zero, BigInt.one), throwsArgumentError);
     });
   });
 }

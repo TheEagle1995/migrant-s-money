@@ -2,8 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:remit/core/api_client.dart';
-import 'package:remit/features/consent/event_queue.dart';
+import 'package:chiroq/core/api_client.dart';
+import 'package:chiroq/features/consent/event_queue.dart';
 
 class _FakeClient extends http.BaseClient {
   final List<http.BaseRequest> sent = [];

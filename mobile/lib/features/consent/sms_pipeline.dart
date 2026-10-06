@@ -31,6 +31,7 @@ class ParserTemplate {
 
 class ParsedSms {
   final String bankSlug;
+  final String currency;
   final BigInt amountMinor;
   final String kind;
   final DateTime occurredAt;
@@ -39,6 +40,7 @@ class ParsedSms {
 
   const ParsedSms({
     required this.bankSlug,
+    required this.currency,
     required this.amountMinor,
     required this.kind,
     required this.occurredAt,
@@ -48,6 +50,7 @@ class ParsedSms {
 
   Map<String, dynamic> toPayload(String householdId) => {
         'householdId': householdId,
+        'currency': currency,
         'amountMinor': amountMinor.toString(),
         'kind': kind,
         'bankSlug': bankSlug,
@@ -56,6 +59,14 @@ class ParsedSms {
         'parserVersion': parserVersion,
       };
 }
+
+/// Bank qaysi valyutada ishlaydi. Serverdan kelgan bank ro'yxatida bo'ladi;
+/// bu yerda faqat zaxira qiymatlar.
+const _bankCurrency = {
+  'kapital': 'UZS', 'ipoteka': 'UZS', 'humo': 'UZS', 'uzcard': 'UZS',
+  'sber': 'RUB', 'tbank': 'RUB', 'alfa': 'RUB',
+  'kaspi': 'KZT', 'halyk': 'KZT',
+};
 
 const _senderMap = {
   'kapitalbank': 'kapital',
@@ -117,6 +128,7 @@ class DeviceSmsParser {
 
       return ParsedSms(
         bankSlug: bank,
+        currency: _bankCurrency[bank] ?? 'UZS',
         amountMinor: amount,
         kind: kind,
         occurredAt: msg.receivedAt,

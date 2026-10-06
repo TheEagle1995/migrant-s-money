@@ -106,7 +106,7 @@ export class AlertsService {
     if (!bounds) throw new BadRequestException(`Noma'lum koridor: ${corridorId}`);
     if (thresholdMinor < bounds.min || thresholdMinor > bounds.max) {
       throw new BadRequestException(
-        `Chegara ${formatMinor(corridor.baseSendMinor, corridor.sendCurrency)} ` +
+        `Chegara ${formatMinor(corridor.sampleSendMinor, corridor.sendCurrency)} ` +
         `${corridor.sendCurrency} uchun ${corridor.recvCurrency} da bo'lishi kerak: ` +
         `${formatMinor(bounds.min, corridor.recvCurrency)} - ` +
         `${formatMinor(bounds.max, corridor.recvCurrency)}`,
@@ -147,7 +147,7 @@ export function thresholdBounds(
 ): { min: bigint; max: bigint } | null {
   const c = findCorridor(corridorId);
   if (!c) return null;
-  const sendMajor = Number(c.baseSendMinor) / Number(minorFactor(c.sendCurrency));
+  const sendMajor = Number(c.sampleSendMinor) / Number(minorFactor(c.sendCurrency));
   const recvFactor = Number(minorFactor(c.recvCurrency));
   return {
     min: BigInt(Math.floor(sendMajor * c.sanityRateMin * recvFactor)),

@@ -12,20 +12,24 @@
  */
 
 export type CurrencyCode =
-  | 'UZS' | 'KRW' | 'RUB' | 'KZT' | 'USD' | 'TRY' | 'KGS' | 'TJS' | 'AED' | 'PLN';
+  | 'UZS' | 'KRW' | 'RUB' | 'KZT' | 'USD' | 'EUR' | 'TRY' | 'KGS' | 'TJS'
+  | 'AED' | 'SAR' | 'QAR' | 'KWD' | 'ILS' | 'PLN' | 'CZK' | 'GBP' | 'JPY'
+  | 'CNY' | 'MYR' | 'CAD' | 'AZN' | 'GEL' | 'BYN' | 'THB' | 'SEK';
 
 export interface CurrencySpec {
   code: CurrencyCode;
   /** ISO 4217 ko'rsatkichi: minor unitdagi kasr raqamlari soni */
   minorDigits: number;
-  /** Ko'rsatish uchun belgi yoki qisqartma */
   symbol: string;
-  /** Mahalliy nomi — ilovada shu ko'rinadi */
   nameUz: string;
-  /** Minglik ajratgich odati: probel, vergul yoki nuqta (turk odati) */
   groupSeparator: ' ' | ',' | '.';
-  /** O'nlik ajratgich odati */
   decimalSeparator: ',' | '.';
+  /**
+   * 1 USD taxminan necha birlik. FAQAT sanity oraliqlarini va namunaviy
+   * summani hisoblash uchun — bu kurs emas va hech qachon narx sifatida
+   * ko'rsatilmaydi. Taxminiy 2026 qiymatlari.
+   */
+  perUsd: number;
 }
 
 /**
@@ -34,16 +38,32 @@ export interface CurrencySpec {
  * bilan ishlash parsing uchun ham to'g'riroq.
  */
 export const CURRENCIES: Record<CurrencyCode, CurrencySpec> = {
-  UZS: { code: 'UZS', minorDigits: 2, symbol: "so'm", nameUz: "so'm",            groupSeparator: ' ', decimalSeparator: ',' },
-  KRW: { code: 'KRW', minorDigits: 0, symbol: '₩',     nameUz: 'Koreya voni',    groupSeparator: ',', decimalSeparator: '.' },
-  RUB: { code: 'RUB', minorDigits: 2, symbol: '₽',     nameUz: 'Rossiya rubli',  groupSeparator: ' ', decimalSeparator: ',' },
-  KZT: { code: 'KZT', minorDigits: 2, symbol: '₸',     nameUz: 'Qozoq tengesi',  groupSeparator: ' ', decimalSeparator: ',' },
-  USD: { code: 'USD', minorDigits: 2, symbol: '$',     nameUz: 'AQSh dollari',   groupSeparator: ',', decimalSeparator: '.' },
-  TRY: { code: 'TRY', minorDigits: 2, symbol: '₺',     nameUz: 'Turk lirasi',    groupSeparator: '.', decimalSeparator: ',' },
-  KGS: { code: 'KGS', minorDigits: 2, symbol: 'som',   nameUz: "Qirg'iz somi",   groupSeparator: ' ', decimalSeparator: ',' },
-  TJS: { code: 'TJS', minorDigits: 2, symbol: 'SM',    nameUz: 'Tojik somoniysi',groupSeparator: ' ', decimalSeparator: ',' },
-  AED: { code: 'AED', minorDigits: 2, symbol: 'AED',   nameUz: 'BAA dirhami',    groupSeparator: ',', decimalSeparator: '.' },
-  PLN: { code: 'PLN', minorDigits: 2, symbol: 'zł',    nameUz: 'Polsha zlotiysi',groupSeparator: ' ', decimalSeparator: ',' },
+  UZS: { code: 'UZS', minorDigits: 2, symbol: "so'm", nameUz: "so'm",             groupSeparator: ' ', decimalSeparator: ',', perUsd: 12034 },
+  KRW: { code: 'KRW', minorDigits: 0, symbol: '₩',    nameUz: 'Koreya voni',      groupSeparator: ',', decimalSeparator: '.', perUsd: 1400 },
+  RUB: { code: 'RUB', minorDigits: 2, symbol: '₽',    nameUz: 'Rossiya rubli',    groupSeparator: ' ', decimalSeparator: ',', perUsd: 80 },
+  KZT: { code: 'KZT', minorDigits: 2, symbol: '₸',    nameUz: 'Qozoq tengesi',    groupSeparator: ' ', decimalSeparator: ',', perUsd: 500 },
+  USD: { code: 'USD', minorDigits: 2, symbol: '$',    nameUz: 'AQSh dollari',     groupSeparator: ',', decimalSeparator: '.', perUsd: 1 },
+  EUR: { code: 'EUR', minorDigits: 2, symbol: '€',    nameUz: 'Yevro',            groupSeparator: ' ', decimalSeparator: ',', perUsd: 0.92 },
+  TRY: { code: 'TRY', minorDigits: 2, symbol: '₺',    nameUz: 'Turk lirasi',      groupSeparator: '.', decimalSeparator: ',', perUsd: 40 },
+  KGS: { code: 'KGS', minorDigits: 2, symbol: 'som',  nameUz: "Qirg'iz somi",     groupSeparator: ' ', decimalSeparator: ',', perUsd: 87 },
+  TJS: { code: 'TJS', minorDigits: 2, symbol: 'SM',   nameUz: 'Tojik somoniysi',  groupSeparator: ' ', decimalSeparator: ',', perUsd: 10.9 },
+  AED: { code: 'AED', minorDigits: 2, symbol: 'AED',  nameUz: 'BAA dirhami',      groupSeparator: ',', decimalSeparator: '.', perUsd: 3.67 },
+  SAR: { code: 'SAR', minorDigits: 2, symbol: 'SAR',  nameUz: 'Saudiya riyoli',   groupSeparator: ',', decimalSeparator: '.', perUsd: 3.75 },
+  QAR: { code: 'QAR', minorDigits: 2, symbol: 'QAR',  nameUz: 'Qatar riyoli',     groupSeparator: ',', decimalSeparator: '.', perUsd: 3.64 },
+  KWD: { code: 'KWD', minorDigits: 3, symbol: 'KWD',  nameUz: 'Kuvayt dinori',    groupSeparator: ',', decimalSeparator: '.', perUsd: 0.31 },
+  ILS: { code: 'ILS', minorDigits: 2, symbol: '₪',    nameUz: 'Isroil shekeli',   groupSeparator: ',', decimalSeparator: '.', perUsd: 3.7 },
+  PLN: { code: 'PLN', minorDigits: 2, symbol: 'zł',   nameUz: 'Polsha zlotiysi',  groupSeparator: ' ', decimalSeparator: ',', perUsd: 4 },
+  CZK: { code: 'CZK', minorDigits: 2, symbol: 'Kč',   nameUz: 'Chex kronasi',     groupSeparator: ' ', decimalSeparator: ',', perUsd: 23 },
+  GBP: { code: 'GBP', minorDigits: 2, symbol: '£',    nameUz: 'Funt sterling',    groupSeparator: ',', decimalSeparator: '.', perUsd: 0.79 },
+  JPY: { code: 'JPY', minorDigits: 0, symbol: '¥',    nameUz: 'Yaponiya yeni',    groupSeparator: ',', decimalSeparator: '.', perUsd: 150 },
+  CNY: { code: 'CNY', minorDigits: 2, symbol: '¥',    nameUz: 'Xitoy yuani',      groupSeparator: ',', decimalSeparator: '.', perUsd: 7.1 },
+  MYR: { code: 'MYR', minorDigits: 2, symbol: 'RM',   nameUz: 'Malayziya ringgiti',groupSeparator: ',', decimalSeparator: '.', perUsd: 4.2 },
+  CAD: { code: 'CAD', minorDigits: 2, symbol: 'C$',   nameUz: 'Kanada dollari',   groupSeparator: ',', decimalSeparator: '.', perUsd: 1.36 },
+  AZN: { code: 'AZN', minorDigits: 2, symbol: '₼',    nameUz: 'Ozarbayjon manati',groupSeparator: ' ', decimalSeparator: ',', perUsd: 1.7 },
+  GEL: { code: 'GEL', minorDigits: 2, symbol: '₾',    nameUz: 'Gruziya larisi',   groupSeparator: ' ', decimalSeparator: ',', perUsd: 2.7 },
+  BYN: { code: 'BYN', minorDigits: 2, symbol: 'Br',   nameUz: 'Belarus rubli',    groupSeparator: ' ', decimalSeparator: ',', perUsd: 3.3 },
+  THB: { code: 'THB', minorDigits: 2, symbol: '฿',    nameUz: 'Tailand bati',     groupSeparator: ',', decimalSeparator: '.', perUsd: 34 },
+  SEK: { code: 'SEK', minorDigits: 2, symbol: 'kr',   nameUz: 'Shvetsiya kronasi',groupSeparator: ' ', decimalSeparator: ',', perUsd: 10.5 },
 };
 
 export function currency(code: CurrencyCode): CurrencySpec {
@@ -74,13 +94,10 @@ export function parseMinor(raw: string | undefined | null, code: CurrencyCode): 
   if (raw === undefined || raw === null) return null;
   const spec = currency(code);
 
-  // Probel, uzilmas probel, apostrof — minglik ajratgichlari
   let s = String(raw).trim().replace(/[\s  ']/g, '');
   if (s === '') return null;
   if (/[^\d.,]/.test(s)) return null;
 
-  // Qaysi belgi o'nlik ajratgich ekanini aniqlaymiz: oxirgi uchragan va
-  // undan keyin 1-2 raqam bo'lgani.
   let intPart = s;
   let fracPart = '';
   const lastComma = s.lastIndexOf(',');
@@ -88,11 +105,31 @@ export function parseMinor(raw: string | undefined | null, code: CurrencyCode): 
   const sepPos = Math.max(lastComma, lastDot);
 
   if (sepPos !== -1) {
+    const sepChar = s[sepPos];
     const tail = s.slice(sepPos + 1);
-    const looksDecimal = /^\d{1,2}$/.test(tail) && s.slice(0, sepPos).replace(/[.,]/g, '').length > 0;
-    if (looksDecimal) {
+    const headHasDigits = s.slice(0, sepPos).replace(/[.,]/g, '').length > 0;
+    if (!/^\d+$/.test(tail) || !headHasDigits) return null;
+
+    // Ajratgichni valyuta odati bo'yicha talqin qilamiz. Uzunlik bo'yicha
+    // taxmin qilish yetarli emas: KWD da "1.250" — 250 fils, "1,250" — 1250
+    // dinor, ikkisi ham uch raqamli dum.
+    const isDecimalChar = sepChar === spec.decimalSeparator;
+    const isGroupChar = sepChar === spec.groupSeparator;
+
+    if (spec.minorDigits === 0) {
+      // Kasrsiz valyuta. Dum 1-2 raqamli bo'lsa, bu minglik guruhi emas —
+      // demak kasr yozilgan va bu parsing xatosi. Jimgina yaxlitlamaymiz.
+      if (tail.length <= 2) return null;
+    } else if (isDecimalChar && tail.length <= spec.minorDigits) {
       intPart = s.slice(0, sepPos);
       fracPart = tail;
+    } else if (!isGroupChar && tail.length <= 2) {
+      // Boshqa odatdagi ajratgich (masalan rus matnida nuqta) — kasr deb olamiz
+      intPart = s.slice(0, sepPos);
+      fracPart = tail;
+    } else if (isDecimalChar && tail.length > spec.minorDigits) {
+      // Kasr juda uzun: "100,1234" — ishonchsiz, rad etamiz
+      if (tail.length !== 3) return null;
     }
   }
 
@@ -107,13 +144,16 @@ export function parseMinor(raw: string | undefined | null, code: CurrencyCode): 
   }
 
   const frac = fracPart.padEnd(spec.minorDigits, '0');
-  const combined = intPart + frac;
-  const value = BigInt(combined);
+  const value = BigInt(intPart + frac);
   return value > 0n ? value : null;
 }
 
 /** Minor unitni o'qiladigan matnga: 854000000n, UZS -> "8 540 000" */
-export function formatMinor(minor: bigint, code: CurrencyCode, opts: { decimals?: boolean } = {}): string {
+export function formatMinor(
+  minor: bigint,
+  code: CurrencyCode,
+  opts: { decimals?: boolean } = {},
+): string {
   const spec = currency(code);
   const neg = minor < 0n;
   const abs = neg ? -minor : minor;
@@ -123,8 +163,6 @@ export function formatMinor(minor: bigint, code: CurrencyCode, opts: { decimals?
 
   let out = whole.toString().replace(/\B(?=(\d{3})+(?!\d))/g, spec.groupSeparator);
 
-  // Kasr qismni faqat so'ralganda yoki nolga teng bo'lmaganda ko'rsatamiz —
-  // "8 540 000,00 so'm" ekranni keraksiz to'ldiradi.
   const showDecimals = opts.decimals ?? frac !== 0n;
   if (spec.minorDigits > 0 && showDecimals) {
     out += spec.decimalSeparator + frac.toString().padStart(spec.minorDigits, '0');
@@ -137,9 +175,29 @@ export function displayMinor(minor: bigint, code: CurrencyCode): string {
   return `${formatMinor(minor, code)} ${currency(code).symbol}`;
 }
 
-/** Major birliklardan minorga — faqat test va seed uchun qulaylik */
+/** Major birliklardan minorga — test va seed uchun qulaylik */
 export function toMinor(major: number | string, code: CurrencyCode): bigint {
-  const parsed = parseMinor(String(major).replace('.', currency(code).decimalSeparator), code);
+  const spec = currency(code);
+  const text = String(major).replace('.', spec.decimalSeparator);
+  const parsed = parseMinor(text, code);
   if (parsed === null) throw new Error(`"${major}" ${code} uchun o'qilmadi`);
   return parsed;
+}
+
+/**
+ * Taxminan 100 USD ga teng, "chiroyli" yumaloq summa.
+ * Ilovada namunaviy qiymat sifatida ko'rsatiladi — foydalanuvchi uni
+ * o'chirib o'z summasini kiritadi.
+ */
+export function niceSampleMinor(code: CurrencyCode, targetUsd = 100): bigint {
+  const spec = currency(code);
+  const raw = targetUsd * spec.perUsd;
+  // 1, 2 yoki 5 × 10^n ko'rinishidagi eng yaqin qiymat
+  const exp = Math.floor(Math.log10(raw));
+  const base = 10 ** exp;
+  const candidates = [base, base * 2, base * 5, base * 10];
+  const nice = candidates.reduce((a, b) =>
+    Math.abs(b - raw) < Math.abs(a - raw) ? b : a,
+  );
+  return BigInt(Math.round(nice)) * minorFactor(code);
 }

@@ -5,7 +5,8 @@ enum Verdict { alive, marginal, dead, insufficientData }
 class ComparisonRow {
   final String providerSlug;
   final String displayName;
-  final Money recvPerMillionKrw;
+  final Money recvNormalized;
+  final String? payoutMethod;
   final int? etaMinutes;
   final bool isPromotional;
   final bool isStale;
@@ -16,7 +17,8 @@ class ComparisonRow {
   const ComparisonRow({
     required this.providerSlug,
     required this.displayName,
-    required this.recvPerMillionKrw,
+    required this.recvNormalized,
+    required this.payoutMethod,
     required this.etaMinutes,
     required this.isPromotional,
     required this.isStale,
@@ -29,8 +31,11 @@ class ComparisonRow {
         providerSlug: j['providerSlug'] as String,
         displayName: j['displayName'] as String,
         // Backend BigInt'ni string qilib yuboradi — JSON'da BigInt yo'q
-        recvPerMillionKrw:
-            Money.uzs(BigInt.parse(j['recvPerMillionKrw'] as String)),
+        recvNormalized: Money(
+          BigInt.parse(j['recvNormalizedMinor'] as String),
+          j['recvCurrency'] as String? ?? 'UZS',
+        ),
+        payoutMethod: j['payoutMethod'] as String?,
         etaMinutes: j['etaMinutes'] as int?,
         isPromotional: j['isPromotional'] as bool? ?? false,
         isStale: j['isStale'] as bool? ?? false,
@@ -41,6 +46,13 @@ class ComparisonRow {
 }
 
 class Comparison {
+  final String corridorId;
+  final String corridorLabel;
+  final String sendCurrency;
+  final String recvCurrency;
+  final Money amountSend;
+  /// Namunaviy qiymatmi yoki foydalanuvchi kiritdimi
+  final bool isSample;
   final List<ComparisonRow> rows;
   final double spread;
   final Money annualLoss;
@@ -48,6 +60,12 @@ class Comparison {
   final DateTime measuredAt;
 
   const Comparison({
+    required this.corridorId,
+    required this.corridorLabel,
+    required this.sendCurrency,
+    required this.recvCurrency,
+    required this.amountSend,
+    required this.isSample,
     required this.rows,
     required this.spread,
     required this.annualLoss,
@@ -55,16 +73,27 @@ class Comparison {
     required this.measuredAt,
   });
 
-  factory Comparison.fromJson(Map<String, dynamic> j) => Comparison(
-        rows: (j['rows'] as List)
-            .map((e) => ComparisonRow.fromJson(e as Map<String, dynamic>))
-            .toList(),
-        spread: (j['spread'] as num?)?.toDouble() ?? 0,
-        annualLoss:
-            Money.uzs(BigInt.parse((j['annualLossMinor'] ?? '0') as String)),
-        verdict: _verdict(j['verdict'] as String?),
-        measuredAt: DateTime.parse(j['measuredAt'] as String),
-      );
+  factory Comparison.fromJson(Map<String, dynamic> j) {
+    final recvCur = j['recvCurrency'] as String? ?? 'UZS';
+    final sendCur = j['sendCurrency'] as String? ?? 'USD';
+    return Comparison(
+      corridorId: j['corridorId'] as String? ?? '',
+      corridorLabel: j['corridorLabel'] as String? ?? '',
+      sendCurrency: sendCur,
+      recvCurrency: recvCur,
+      amountSend: Money(
+        BigInt.parse((j['amountSendMinor'] ?? '0') as String), sendCur),
+      isSample: j['isSample'] as bool? ?? true,
+      rows: (j['rows'] as List)
+          .map((e) => ComparisonRow.fromJson({...e as Map<String, dynamic>, 'recvCurrency': recvCur}))
+          .toList(),
+      spread: (j['spread'] as num?)?.toDouble() ?? 0,
+      annualLoss: Money(
+        BigInt.parse((j['annualLossMinor'] ?? '0') as String), recvCur),
+      verdict: _verdict(j['verdict'] as String?),
+      measuredAt: DateTime.parse(j['measuredAt'] as String),
+    );
+  }
 
   static Verdict _verdict(String? v) {
     switch (v) {

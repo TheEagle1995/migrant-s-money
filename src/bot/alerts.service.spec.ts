@@ -1,7 +1,8 @@
 import { evaluateAlerts, AlertSubscription, thresholdBounds } from './alerts.service';
 import { buildComparison } from '../rates/comparison.service';
 import { provider, quote, KR_UZ, RU_UZ } from '../testing/fixtures';
-import { toMinor } from '../domain/currency';
+import { toMinor, minorFactor } from '../domain/currency';
+import { findCorridor } from '../domain/corridor';
 
 const NOW = new Date('2026-08-24T12:00:00Z');
 const ago = (h: number) => new Date(NOW.getTime() - h * 3600_000);
@@ -85,21 +86,33 @@ describe('evaluateAlerts', () => {
 });
 
 describe('thresholdBounds — koridordan hisoblanadi', () => {
-  it('Koreya koridori uchun so\'mda oraliq beradi', () => {
+  // Bazalar va oraliqlar valyuta kursidan hisoblanadi, shuning uchun
+  // aniq raqamga bog'lanmaymiz — munosabatni tekshiramiz.
+  it('oraliq namunaviy summaga mos keladi', () => {
+    const c = findCorridor('KR-UZ')!;
     const b = thresholdBounds('KR-UZ')!;
-    // 1 mln KRW x 4..20 so'm
-    expect(b.min).toBe(toMinor(4_000_000, 'UZS'));
-    expect(b.max).toBe(toMinor(20_000_000, 'UZS'));
+    const sendMajor = Number(c.sampleSendMinor) / Number(minorFactor('KRW'));
+    const factor = Number(minorFactor('UZS'));
+    expect(Number(b.min) / factor).toBeCloseTo(sendMajor * c.sanityRateMin, 0);
+    expect(Number(b.max) / factor).toBeCloseTo(sendMajor * c.sanityRateMax, 0);
+    expect(b.min).toBeLessThan(b.max);
   });
 
   // ASOSIY TUZATISH: ilgari oraliq 4-20 mln so'm deb qattiq yozilgan edi,
   // ya'ni Rossiya koridorining to'g'ri chegarasi ham rad etilardi.
-  it('Rossiya koridori uchun boshqa oraliq beradi', () => {
-    const b = thresholdBounds('RU-UZ')!;
-    // 50 000 RUB x 60..400 so'm
-    expect(b.min).toBe(toMinor(3_000_000, 'UZS'));
-    expect(b.max).toBe(toMinor(20_000_000, 'UZS'));
-    expect(b.min).not.toBe(thresholdBounds('KR-UZ')!.min);
+  it('har bir koridor o\'z oralig\'ini oladi', () => {
+    const kr = thresholdBounds('KR-UZ')!;
+    const ru = thresholdBounds('RU-UZ')!;
+    const us = thresholdBounds('US-UZ')!;
+    expect(ru.min).not.toBe(kr.min);
+    expect(us.min).not.toBe(kr.min);
+    for (const b of [kr, ru, us]) expect(b.min).toBeLessThan(b.max);
+  });
+
+  it('teskari koridor uchun ham ishlaydi', () => {
+    const b = thresholdBounds('UZ-RU');
+    expect(b).not.toBeNull();
+    expect(b!.min).toBeLessThan(b!.max);
   });
 
   it('noma\'lum koridorda null', () => {

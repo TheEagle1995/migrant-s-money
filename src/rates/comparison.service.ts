@@ -3,6 +3,7 @@ import { Quote, Provider } from '../domain/types';
 import { normalizeTo } from '../domain/money';
 import { formatMinor, CurrencyCode } from '../domain/currency';
 import { Corridor, corridorLabel, findCorridor, liveCorridors } from '../domain/corridor';
+import { PayoutMethod } from '../domain/methods';
 import { PROVIDER_REPO, QUOTE_REPO, ProviderRepository, QuoteRepository } from './ports';
 
 /** Shundan eski kotirovka "eskirgan" deb BELGILANADI — yashirilmaydi. */
@@ -16,6 +17,7 @@ export interface ComparisonRow {
   recvFormatted: string;
   feeMinor: bigint;
   etaMinutes: number | null;
+  payoutMethod: PayoutMethod | null;
   isPromotional: boolean;
   fetchedAt: Date;
   isStale: boolean;
@@ -31,9 +33,14 @@ export interface ComparisonResult {
   corridorLabel: string;
   sendCurrency: CurrencyCode;
   recvCurrency: CurrencyCode;
-  /** Taqqoslash qaysi summa uchun — ilovada sarlavhada ko'rsatiladi */
-  baseSendMinor: bigint;
-  baseSendFormatted: string;
+  /**
+   * Taqqoslash qaysi summa uchun hisoblangani. Foydalanuvchi kiritgan summa,
+   * yoki u hech narsa kiritmagan bo'lsa koridorning namunaviy qiymati.
+   */
+  amountSendMinor: bigint;
+  amountSendFormatted: string;
+  /** Namunaviy qiymatmi yoki foydalanuvchi kiritdimi */
+  isSample: boolean;
   rows: ComparisonRow[];
   best: ComparisonRow | null;
   worst: ComparisonRow | null;
@@ -55,7 +62,14 @@ export function buildComparison(
   providers: Provider[],
   quotes: Quote[],
   now: Date = new Date(),
+  /** Foydalanuvchi kiritgan summa. Berilmasa koridorning namunaviy qiymati. */
+  amountSendMinor?: bigint,
 ): ComparisonResult {
+  const amount =
+    amountSendMinor !== undefined && amountSendMinor > 0n
+      ? amountSendMinor
+      : corridor.sampleSendMinor;
+  const isSample = amountSendMinor === undefined || amountSendMinor <= 0n;
   const byId = new Map(providers.map((p) => [p.id, p]));
 
   const rows: ComparisonRow[] = quotes
@@ -67,7 +81,9 @@ export function buildComparison(
     )
     .map((q) => {
       const p = byId.get(q.providerId)!;
-      const normalized = normalizeTo(q.recvMinor, q.sendMinor, corridor.baseSendMinor);
+      // Kotirovka boshqa summada olingan bo'lsa ham, foydalanuvchi
+      // kiritgan summaga proporsional keltiriladi.
+      const normalized = normalizeTo(q.recvMinor, q.sendMinor, amount);
       const ageMs = now.getTime() - q.fetchedAt.getTime();
       return {
         providerSlug: p.slug,
@@ -76,6 +92,7 @@ export function buildComparison(
         recvFormatted: formatMinor(normalized, corridor.recvCurrency),
         feeMinor: q.feeMinor,
         etaMinutes: q.etaMinutes,
+        payoutMethod: (q.payoutMethod as PayoutMethod | null) ?? null,
         isPromotional: q.isPromotional,
         fetchedAt: q.fetchedAt,
         isStale: ageMs > STALE_AFTER_MS,
@@ -101,8 +118,9 @@ export function buildComparison(
     corridorLabel: corridorLabel(corridor),
     sendCurrency: corridor.sendCurrency,
     recvCurrency: corridor.recvCurrency,
-    baseSendMinor: corridor.baseSendMinor,
-    baseSendFormatted: formatMinor(corridor.baseSendMinor, corridor.sendCurrency),
+    amountSendMinor: amount,
+    amountSendFormatted: formatMinor(amount, corridor.sendCurrency),
+    isSample,
     measuredAt: now,
   };
 
@@ -142,14 +160,17 @@ export class ComparisonService {
     @Inject(QUOTE_REPO) private readonly quotes: QuoteRepository,
   ) {}
 
-  async forCorridor(corridorId: string): Promise<ComparisonResult> {
+  async forCorridor(
+    corridorId: string,
+    amountSendMinor?: bigint,
+  ): Promise<ComparisonResult> {
     const corridor = findCorridor(corridorId);
     if (!corridor) throw new Error(`Noma'lum koridor: ${corridorId}`);
     const [providers, quotes] = await Promise.all([
       this.providers.listActive(),
-      this.quotes.latestPerProvider(corridorId),
+      this.quotes.latestPerProvider(corridor.id),
     ]);
-    return buildComparison(corridor, providers, quotes);
+    return buildComparison(corridor, providers, quotes, new Date(), amountSendMinor);
   }
 
   /** Barcha faol koridorlar — bot kunlik postida va ilova boshida ishlatiladi */

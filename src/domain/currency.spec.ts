@@ -1,5 +1,6 @@
 import {
   parseMinor, formatMinor, displayMinor, minorFactor, toMinor, currency,
+  niceSampleMinor, CURRENCIES,
 } from './currency';
 
 describe('parseMinor — valyuta kasrini hisobga oladi', () => {
@@ -138,5 +139,39 @@ describe('toMinor (seed va test qulayligi)', () => {
 describe('currency', () => {
   it('noma\'lum valyutada xato beradi', () => {
     expect(() => currency('XXX' as never)).toThrow(/Noma'lum valyuta/);
+  });
+});
+
+describe('niceSampleMinor — namunaviy summa', () => {
+  it('~100 USD ekvivalentiga yaqin yumaloq son beradi', () => {
+    expect(niceSampleMinor('USD')).toBe(toMinor(100, 'USD'));
+    expect(niceSampleMinor('KRW')).toBe(toMinor(100_000, 'KRW'));
+    expect(niceSampleMinor('RUB')).toBe(toMinor(10_000, 'RUB'));
+    expect(niceSampleMinor('UZS')).toBe(toMinor(1_000_000, 'UZS'));
+  });
+
+  it('har bir valyuta uchun musbat qiymat beradi', () => {
+    for (const code of Object.keys(CURRENCIES) as Array<keyof typeof CURRENCIES>) {
+      expect(niceSampleMinor(code)).toBeGreaterThan(0n);
+    }
+  });
+});
+
+describe('kasrsiz valyutada kasr — parsing xatosi, yaxlitlash emas', () => {
+  it('KRW va JPY da kasrli matnni rad etadi', () => {
+    expect(parseMinor('1 000 000,50', 'KRW')).toBeNull();
+    expect(parseMinor('20 000.5', 'JPY')).toBeNull();
+  });
+  it('lekin minglik guruhini qabul qiladi', () => {
+    expect(parseMinor('1,000,000', 'KRW')).toBe(1_000_000n);
+    expect(parseMinor('20,000', 'JPY')).toBe(20_000n);
+  });
+});
+
+describe('uch kasrli valyuta (KWD)', () => {
+  it('nuqtani kasr, vergulni minglik deb oladi', () => {
+    // KWD: decimalSeparator '.', groupSeparator ','
+    expect(parseMinor('1.250', 'KWD')).toBe(1_250n);   // 1 dinor 250 fils
+    expect(parseMinor('1,250', 'KWD')).toBe(1_250_000n); // 1250 dinor
   });
 });

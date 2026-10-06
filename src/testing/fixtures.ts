@@ -38,7 +38,7 @@ export function quote(
   const c = opts.corridor ?? KR_UZ;
   const sendMinor =
     opts.sendMinor ??
-    (opts.sendMajor !== undefined ? toMinor(opts.sendMajor, c.sendCurrency) : c.baseSendMinor);
+    (opts.sendMajor !== undefined ? toMinor(opts.sendMajor, c.sendCurrency) : c.sampleSendMinor);
   return {
     id: opts.id ?? 1n,
     providerId: opts.providerId ?? `p-${slug}`,

@@ -21,8 +21,8 @@ const russia = () => buildComparison(
   RU_UZ,
   [provider('korona', { displayName: 'Korona Pay', countries: ['RU'] }), provider('unistream', { displayName: 'Unistream', countries: ['RU'] })],
   [
-    quote('korona', 7_500_000, { corridor: RU_UZ, fetchedAt: ago(1) }),
-    quote('unistream', 7_300_000, { corridor: RU_UZ, fetchedAt: ago(1) }),
+    quote('korona', 1_500_000, { corridor: RU_UZ, fetchedAt: ago(1) }),
+    quote('unistream', 1_460_000, { corridor: RU_UZ, fetchedAt: ago(1) }),
   ],
   NOW,
 );
@@ -40,13 +40,13 @@ describe('renderDailyPost', () => {
     const out = renderDailyPost(korea(), NOW);
     expect(out).toContain("Koreya → O'zbekiston");
     expect(out).toContain('🇰🇷🇺🇿');
-    expect(out).toContain('1,000,000 ₩');
+    expect(out).toContain('100,000 ₩');
   });
 
   it('Rossiya koridorini o\'z valyutasi bilan chiqaradi', () => {
     const out = renderDailyPost(russia(), NOW);
     expect(out).toContain("Rossiya → O'zbekiston");
-    expect(out).toContain('50 000 ₽');
+    expect(out).toContain('10 000 ₽');
     expect(out).toContain('🥇 *Korona Pay*');
   });
 

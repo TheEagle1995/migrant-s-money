@@ -44,6 +44,10 @@ model Provider {
   /// Qaysi davlatlardan yuborish mumkin: ["KR"], ["RU","KZ"]
   /// Sentbe (Koreya) va Korona (Rossiya) bitta ro'yxatda chiqmasligi uchun.
   sendCountries String[]
+  /// Qabul qiluvchi pulni qanday olishi mumkin: CARD, CASH_PICKUP, ...
+  payouts       String[]
+  /// Yuboruvchi qanday to'laydi: BANK_TRANSFER, DEBIT_CARD, CASH_AGENT, ...
+  funding       String[]
   isLicensed  Boolean      @default(true) // 기획재정부 ro'yxatida bormi
   homepageUrl String?
   // affiliate holati — ranking'ga TA'SIR QILMAYDI, faqat hisobot uchun

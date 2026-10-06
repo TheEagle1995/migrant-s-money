@@ -5,15 +5,18 @@ import '../../models/comparison.dart';
 
 /// "Yubordim" ekrani.
 ///
-/// Bu yerda prognoz hisoblanadi — keyinchalik SMS shu prognozga qarab
+/// Bu yerda prognoz hisoblanadi — keyinchalik bank SMS'i shu prognozga qarab
 /// avtomatik bog'lanadi. Prognozsiz moslashtirish umuman ishlamaydi.
 class DeclareTransferScreen extends StatefulWidget {
   final ApiClient api;
   final String householdId;
+  /// Qaysi koridor uchun — kurslar ekranidan uzatiladi
+  final String corridorId;
   const DeclareTransferScreen({
     super.key,
     required this.api,
     required this.householdId,
+    required this.corridorId,
   });
 
   @override
@@ -21,7 +24,7 @@ class DeclareTransferScreen extends StatefulWidget {
 }
 
 class _DeclareTransferScreenState extends State<DeclareTransferScreen> {
-  final _amount = TextEditingController(text: '1000000');
+  final _amount = TextEditingController();
   Comparison? _comparison;
   String? _slug;
   bool _busy = false;
@@ -30,11 +33,12 @@ class _DeclareTransferScreenState extends State<DeclareTransferScreen> {
   @override
   void initState() {
     super.initState();
-    widget.api.comparison().then((c) {
+    widget.api.comparison(widget.corridorId).then((c) {
       if (!mounted) return;
       setState(() {
         _comparison = c;
         _slug = c.rows.isNotEmpty ? c.rows.first.providerSlug : null;
+        if (_amount.text.isEmpty) _amount.text = c.amountSend.formatted;
       });
     }).catchError((_) {});
   }
@@ -45,27 +49,24 @@ class _DeclareTransferScreenState extends State<DeclareTransferScreen> {
     super.dispose();
   }
 
-  BigInt? get _krw {
-    final raw = _amount.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (raw.isEmpty) return null;
-    final v = BigInt.tryParse(raw);
-    return (v == null || v <= BigInt.zero) ? null : v;
-  }
+  String get _sendCurrency => _comparison?.sendCurrency ?? 'USD';
+
+  BigInt? get _sentMinor => Money.parseMajor(_amount.text, _sendCurrency);
 
   /// Tanlangan kanal kotirovkasidan proporsional prognoz
   Money? get _expected {
-    final krw = _krw;
+    final sent = _sentMinor;
     final c = _comparison;
-    if (krw == null || c == null || _slug == null) return null;
+    if (sent == null || c == null || _slug == null) return null;
     final row = c.rows.where((r) => r.providerSlug == _slug).firstOrNull;
-    if (row == null) return null;
-    final perMillion = row.recvPerMillionKrw.minor;
-    return Money.uzs(perMillion * krw ~/ BigInt.from(1000000));
+    if (row == null || c.amountSend.minor == BigInt.zero) return null;
+    final value = row.recvNormalized.minor * sent ~/ c.amountSend.minor;
+    return Money(value, c.recvCurrency);
   }
 
   Future<void> _submit() async {
-    final krw = _krw;
-    if (krw == null) {
+    final sent = _sentMinor;
+    if (sent == null) {
       setState(() => _error = 'Summani kiriting');
       return;
     }
@@ -76,7 +77,8 @@ class _DeclareTransferScreenState extends State<DeclareTransferScreen> {
     try {
       await widget.api.declareTransfer(
         householdId: widget.householdId,
-        sentMinorKrw: krw,
+        corridorId: widget.corridorId,
+        sentMinor: sent,
         providerSlug: _slug,
       );
       if (mounted) Navigator.of(context).pop(true);
@@ -95,12 +97,19 @@ class _DeclareTransferScreenState extends State<DeclareTransferScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (_comparison != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: Text(_comparison!.corridorLabel,
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
+            ),
           TextField(
             controller: _amount,
             keyboardType: TextInputType.number,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
-              labelText: 'Qancha yubordingiz (KRW)',
+              labelText: 'Qancha yubordingiz',
+              suffixText: _sendCurrency,
               errorText: _error,
               border: const OutlineInputBorder(),
             ),
@@ -109,10 +118,10 @@ class _DeclareTransferScreenState extends State<DeclareTransferScreen> {
           if (_comparison == null)
             const LinearProgressIndicator()
           else if (_comparison!.rows.isEmpty)
-            const Text('Kanallar ro\'yxati bo\'sh — kurs yuklanmagan.')
+            const Text('Bu koridor uchun kurs yuklanmagan.')
           else
             DropdownButtonFormField<String>(
-              value: _slug,
+              initialValue: _slug,
               decoration: const InputDecoration(
                 labelText: 'Qaysi kanal orqali',
                 border: OutlineInputBorder(),
@@ -125,32 +134,30 @@ class _DeclareTransferScreenState extends State<DeclareTransferScreen> {
                   .toList(),
               onChanged: (v) => setState(() => _slug = v),
             ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 22),
           if (expected != null)
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.teal.shade50,
-                borderRadius: BorderRadius.circular(8),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: .10),
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Taxminan yetib boradi',
-                      style: TextStyle(fontSize: 12, color: Colors.black54)),
+                  const Text('Taxminan yetib boradi', style: TextStyle(fontSize: 12)),
                   const SizedBox(height: 4),
                   Text(expected.display,
-                      style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.w700)),
+                      style: const TextStyle(fontSize: 23, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 8),
                   const Text(
                     'Aniq summa bank xabari kelganda ma\'lum bo\'ladi.',
-                    style: TextStyle(fontSize: 12, color: Colors.black54),
+                    style: TextStyle(fontSize: 12),
                   ),
                 ],
               ),
             ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 22),
           FilledButton(
             onPressed: _busy ? null : _submit,
             child: _busy

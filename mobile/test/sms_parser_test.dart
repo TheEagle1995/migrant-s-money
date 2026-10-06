@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remit/features/consent/sms_pipeline.dart';
-import 'package:remit/platform/sms_channel.dart';
+import 'package:chiroq/features/consent/sms_pipeline.dart';
+import 'package:chiroq/platform/sms_channel.dart';
 
 ParserTemplate kapital({int version = 2}) => ParserTemplate.fromJson({
       'bankSlug': 'kapital',
@@ -49,6 +49,7 @@ void main() {
           SmsMessage('KAPITALBANK', '8712 Popolnenie: 8 540 000,00 UZS', at));
       expect(r, isNotNull);
       expect(r!.amountMinor, BigInt.from(8540000));
+      expect(r.currency, 'UZS');
       expect(r.kind, 'CREDIT');
       expect(r.confidence, greaterThan(0.9));
       expect(r.parserVersion, 2);

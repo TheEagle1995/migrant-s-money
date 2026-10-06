@@ -24,6 +24,8 @@ class _HomeShellState extends State<HomeShell> {
   int _index = 0;
   /// O'tkazma qo'shilgandan keyin ro'yxatni majburan qayta qurish uchun
   int _pendingEpoch = 0;
+  /// Kurslar ekranida tanlangan yo'nalish — "Yubordim" shuni oladi
+  String _corridorId = 'KR-UZ';
   late ApiClient _api = ApiClient(widget.settings.apiUrl);
 
   Future<void> _openSettings(BuildContext context) async {
@@ -43,7 +45,11 @@ class _HomeShellState extends State<HomeShell> {
       body: IndexedStack(
         index: _index,
         children: [
-          RatesScreen(api: _api, onOpenSettings: _openSettings),
+          RatesScreen(
+            api: _api,
+            onOpenSettings: _openSettings,
+            onCorridorChanged: (id) => _corridorId = id,
+          ),
           if (household == null)
             _NeedHousehold(onOpenSettings: () => _openSettings(context))
           else
@@ -67,6 +73,7 @@ class _HomeShellState extends State<HomeShell> {
                         builder: (_) => DeclareTransferScreen(
                           api: _api,
                           householdId: household,
+                          corridorId: _corridorId,
                         ),
                       ),
                     );

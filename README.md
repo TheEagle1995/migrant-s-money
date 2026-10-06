@@ -36,12 +36,13 @@ O'zak mintaqada tanish: *chiroq* (o'zbek, tojik), *чырак* (qirg'iz),
 
 | Qism | Holat |
 |---|---|
-| Valyuta qatlami (ISO 4217 kasrlari) | ✅ 23 test |
-| Koridor registri (10 koridor, 7 faol) | ✅ |
-| Taqqoslash va reyting | ✅ 13 test |
+| Valyuta qatlami (26 valyuta, ISO 4217 kasrlari) | ✅ 28 test |
+| Koridor registri (47 koridor, 40 faol, 29 davlat) | ✅ 28 test |
+| Taqqoslash — istalgan summa uchun | ✅ 16 test |
 | Moslashtirish (Transfer ↔ SMS) | ✅ 11 test |
-| SMS parser — 24 bank, 6 davlat | ✅ 22 test |
+| SMS parser — 83 bank, 23 davlat | ✅ 22 test |
 | Maqsadlar | ✅ 6 test |
+| Provayderlar — 48 ta, usullari bilan | ✅ seed izchilligi testlangan |
 | Kurs ogohlantirishlari | ✅ 14 test |
 | To'liq oqim integratsiyasi | ✅ 15 test |
 | Telegram bot (ko'p koridor) | ✅ 10 test |
@@ -52,28 +53,58 @@ O'zak mintaqada tanish: *chiroq* (o'zbek, tojik), *чырак* (qirg'iz),
 | Android SMS receiver | ⚠️ qurilmada sinalmagan |
 | Avtomatik kurs adapterlari | ❌ **yo'q — sababi quyida** |
 
-`npm test` → **133 test**. `npx tsc --noEmit` → 0 xato.
+`npm test` → **170 test**. `npx tsc --noEmit` → 0 xato.
 
 ---
 
-## Koridorlar
+## Koridorlar — 47 ta, 40 faol, 29 davlat
 
-| Koridor | Baza | Sanity oraliq |
-|---|---|---|
-| 🇰🇷 → 🇺🇿 | 1 000 000 KRW | 4–20 so'm |
-| 🇷🇺 → 🇺🇿 | 50 000 RUB | 60–400 |
-| 🇰🇿 → 🇺🇿 | 500 000 KZT | 8–60 |
-| 🇺🇸 → 🇺🇿 | 1 000 USD | 7 000–20 000 |
-| 🇹🇷 → 🇺🇿 | 10 000 TRY | 100–900 |
-| 🇦🇪 → 🇺🇿 | 5 000 AED | 1 800–5 500 |
-| 🇵🇱 → 🇺🇿 | 10 000 PLN | sinalmagan |
+Koridorlar **qo'lda yozilmaydi**. Juftliklar ro'yxatidan generatsiya qilinadi,
+sanity oraliqlari esa valyutalarning taxminiy USD kursidan hisoblanadi —
+shuning uchun yangi davlat qo'shish bitta qator va oraliq avtomatik to'g'ri.
 
-Sanity oraliqlar **narx emas** — faqat kiritish xatosini tutish uchun keng
-to'siq. Masalan so'm o'rniga ming so'm yozilsa darhol ushlanadi.
+**O'zbekistonga** (27 davlat): Rossiya, Koreya, Qozog'iston, Turkiya, AQSh,
+BAA, Saudiya, Qatar, Kuvayt, Isroil, Polsha, Chexiya, Buyuk Britaniya,
+Germaniya, Italiya, Fransiya, Litva, Latviya, Shvetsiya, Yaponiya, Xitoy,
+Malayziya, Kanada, Qirg'iziston, Tojikiston, Ozarbayjon, Gruziya.
 
-Yangi koridor qo'shish: `src/domain/corridor.ts` ga bitta qator, provayderlarni
-seed'ga, banklarni `banks.seed.json` ga. Kodning boshqa hech bir joyi
-tegilmaydi — audit shuni ta'minlash uchun qilingan.
+**O'zbekistondan** (10 davlat): Rossiya, Koreya, Qozog'iston, Turkiya, AQSh,
+BAA, Germaniya, Buyuk Britaniya, Xitoy, Yaponiya — talabalar, biznes,
+oilaga qaytarish.
+
+**Mintaqa ichida**: Rossiya → Qirg'iziston / Tojikiston, Qozog'iston → Qirg'iziston.
+
+Sanity oraliqlar **narx emas** — kiritish xatosini tutish uchun keng to'siq
+(taxminiy kursning 0.4x–2.5x). So'm o'rniga ming so'm yozilsa darhol ushlanadi.
+
+## Summa foydalanuvchidan
+
+Ilova koridorning namunaviy summasi bilan ochiladi (~100 USD ekvivalenti,
+1/2/5 × 10ⁿ ko'rinishida yumaloqlangan: 100 000 ₩, 10 000 ₽, 100 $).
+Foydalanuvchi uni o'chirib o'z summasini kiritadi va ro'yxat darhol qayta
+hisoblanadi.
+
+```
+GET /rates/compare/KR-UZ                 → namunaviy summa, isSample: true
+GET /rates/compare/KR-UZ?amount=2500000  → kiritilgan summa, isSample: false
+GET /rates/countries                     → yuborish davlatlari va yo'nalishlari
+GET /rates/methods                       → yuborish va olish usullari
+```
+
+Tartib summadan qat'i nazar o'zgarmaydi — summa hamma kanalga bir xil
+ta'sir qiladi. Bunga alohida test bor.
+
+## Yuborish va olish usullari
+
+Olish: kartaga, bank hisobiga, filialdan naqd, uyga yetkazib berish,
+mobil hamyonga, telefon hisobiga.
+
+To'lash: bank o'tkazmasi, debet/kredit karta, agentda naqd, ilova hamyoni,
+Apple/Google Pay.
+
+Bir xil operator turli usullar uchun turli kurs beradi — shuning uchun usul
+kotirovkaning bir qismi, qo'shimcha izoh emas. Ilovada usul bo'yicha
+filtrlash bor.
 
 ---
 

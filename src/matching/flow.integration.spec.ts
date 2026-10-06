@@ -93,8 +93,9 @@ describe("to'liq oqim: import -> taqqoslash -> o'tkazma -> SMS -> OBSERVED", () 
     expect(report.failed).toHaveLength(0);
 
     // Affiliate'li Sentbe ikkinchi o'rinda qoladi
-    const cmp = await w.comparison.forCorridor('KR-UZ');
+    const cmp = await w.comparison.forCorridor('KR-UZ', toMinor(1_000_000, 'KRW'));
     expect(cmp.rows.map((r) => r.providerSlug)).toEqual(['toss', 'sentbe']);
+    expect(cmp.isSample).toBe(false);
 
     // 500 000 KRW yuboradi — prognoz proporsional
     const t = await declare(w, 'toss', 'KR-UZ', 500_000, DECLARED);
@@ -122,7 +123,7 @@ describe("to'liq oqim: import -> taqqoslash -> o'tkazma -> SMS -> OBSERVED", () 
     expect(observed[0].rate).toBe('8.5000000000');
 
     // OBSERVED endi eng yangi kotirovka — taqqoslash uni ishlatadi
-    const after = await w.comparison.forCorridor('KR-UZ');
+    const after = await w.comparison.forCorridor('KR-UZ', toMinor(1_000_000, 'KRW'));
     const toss = after.rows.find((r) => r.providerSlug === 'toss')!;
     expect(toss.source).toBe('OBSERVED');
     expect(toss.recvNormalizedMinor).toBe(toMinor(8_500_000, 'UZS'));
@@ -217,7 +218,7 @@ describe("to'liq oqim: import -> taqqoslash -> o'tkazma -> SMS -> OBSERVED", () 
       { ...row('toss', 'KR-UZ', 1_000_000, 8_540_000), measuredAt: new Date(Date.now() - 3600_000) },
       { ...row('sentbe', 'KR-UZ', 1_000_000, 8_100_000), measuredAt: new Date(Date.now() - 3600_000) },
     ]);
-    const cmp = await w.comparison.forCorridor('KR-UZ');
+    const cmp = await w.comparison.forCorridor('KR-UZ', toMinor(1_000_000, 'KRW'));
     const post = renderDailyPost(cmp);
 
     expect(cmp.verdict).toBe('ALIVE');

@@ -1,10 +1,9 @@
 <title>Chiroq</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Martian+Mono:wght@400;500;600&display=swap">
 <style>
-  /* Layout: qorong'i qobiq ustida yorug'lik — eng yaxshi kanal "yonadi".
-     Yuqorida koridor tanlagich, markazda yo'qotish o'lchagichi, pastda ro'yxat. */
+  /* Layout: yuqorida yo'nalish va summa kiritish, markazda yo'qotish
+     o'lchagichi, pastda kanallar ro'yxati. Eng yaxshisi "yonadi". */
   :root {
-    /* Dark-first: Chiroq qorong'ilikda ma'noga ega */
     --ink: #0a0f14;
     --surface: #121a22;
     --surface-2: #19232d;
@@ -22,204 +21,190 @@
   }
   @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) {
-      --ink: #f4f6f8;
-      --surface: #ffffff;
-      --surface-2: #eef2f6;
-      --line: #dbe3ec;
-      --fg: #0d1620;
-      --muted: #5c6b7a;
-      --glow: #c47606;
-      --glow-soft: #fff2dc;
-      --glow-dim: #e0a860;
-      --loss: #c4342a;
-      --ok: #107a5a;
-      color-scheme: light;
+      --ink: #f4f6f8; --surface: #ffffff; --surface-2: #eef2f6; --line: #dbe3ec;
+      --fg: #0d1620; --muted: #5c6b7a; --glow: #c47606; --glow-soft: #fff2dc;
+      --glow-dim: #e0a860; --loss: #c4342a; --ok: #107a5a; color-scheme: light;
     }
   }
   :root[data-theme="light"] {
-    --ink: #f4f6f8;
-    --surface: #ffffff;
-    --surface-2: #eef2f6;
-    --line: #dbe3ec;
-    --fg: #0d1620;
-    --muted: #5c6b7a;
-    --glow: #c47606;
-    --glow-soft: #fff2dc;
-    --glow-dim: #e0a860;
-    --loss: #c4342a;
-    --ok: #107a5a;
-    color-scheme: light;
+    --ink: #f4f6f8; --surface: #ffffff; --surface-2: #eef2f6; --line: #dbe3ec;
+    --fg: #0d1620; --muted: #5c6b7a; --glow: #c47606; --glow-soft: #fff2dc;
+    --glow-dim: #e0a860; --loss: #c4342a; --ok: #107a5a; color-scheme: light;
   }
 
   * { box-sizing: border-box; }
   html, body { height: 100%; }
   body {
-    margin: 0;
-    background: var(--ink);
-    color: var(--fg);
-    font-family: var(--ui);
-    font-size: 15px;
-    line-height: 1.45;
-    display: flex;
-    justify-content: center;
+    margin: 0; background: var(--ink); color: var(--fg);
+    font-family: var(--ui); font-size: 15px; line-height: 1.45;
+    display: flex; justify-content: center;
   }
   button { font: inherit; color: inherit; }
 
   .app {
-    position: relative;
-    width: 100%;
-    max-width: 430px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background: var(--ink);
+    position: relative; width: 100%; max-width: 430px; height: 100%;
+    display: flex; flex-direction: column; overflow: hidden; background: var(--ink);
   }
   @media (min-width: 540px) and (min-height: 720px) {
     body { align-items: center; }
     .app {
-      height: min(840px, 100% - 40px);
-      border: 1px solid var(--line);
-      border-radius: 30px;
-      box-shadow: 0 24px 70px rgba(0,0,0,.45);
+      height: min(860px, 100% - 40px); border: 1px solid var(--line);
+      border-radius: 30px; box-shadow: 0 24px 70px rgba(0,0,0,.45);
     }
   }
 
-  /* ---------- sarlavha ---------- */
   .top {
-    flex: none;
-    padding: 16px 18px 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    flex: none; padding: 14px 18px 11px; display: flex; align-items: center; gap: 10px;
     border-bottom: 1px solid var(--line);
   }
   .mark { display: flex; align-items: center; gap: 9px; flex: 1; min-width: 0; }
-  .mark svg { width: 24px; height: 24px; flex: none; }
-  .mark b {
-    font-size: 19px; font-weight: 800; letter-spacing: -.02em;
-  }
+  .mark svg { width: 23px; height: 23px; flex: none; }
+  .mark b { font-size: 18px; font-weight: 800; letter-spacing: -.02em; }
   .mark i {
-    font-style: normal; font-size: 11px; color: var(--muted);
-    display: block; letter-spacing: .04em; text-transform: uppercase;
+    font-style: normal; font-size: 10.5px; color: var(--muted); display: block;
+    letter-spacing: .04em; text-transform: uppercase;
   }
   .ico {
-    flex: none; width: 34px; height: 34px; border-radius: 10px;
+    flex: none; width: 33px; height: 33px; border-radius: 10px;
     border: 1px solid var(--line); background: var(--surface);
     display: grid; place-items: center; cursor: pointer;
   }
   .ico:hover { border-color: var(--glow-dim); }
-  .ico svg { width: 17px; height: 17px; }
+  .ico svg { width: 16px; height: 16px; }
 
   .demo {
     flex: none; background: var(--glow-soft); color: var(--glow);
-    font-size: 11.5px; padding: 7px 18px; border-bottom: 1px solid var(--line);
+    font-size: 11px; padding: 6px 18px; border-bottom: 1px solid var(--line);
   }
-  .demo b { font-weight: 700; }
 
-  /* ---------- koridor tanlagich ---------- */
-  .corridors {
-    flex: none; display: flex; gap: 7px; overflow-x: auto;
-    padding: 12px 18px; border-bottom: 1px solid var(--line);
-    scrollbar-width: none;
+  /* ---------- yo'nalish + summa ---------- */
+  .entry { flex: none; padding: 14px 18px 16px; border-bottom: 1px solid var(--line); }
+
+  .route { display: flex; align-items: stretch; gap: 8px; margin-bottom: 14px; }
+  .leg {
+    flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--surface);
+    border-radius: 12px; padding: 9px 11px; cursor: pointer; text-align: left;
+    display: flex; align-items: center; gap: 9px;
   }
-  .corridors::-webkit-scrollbar { display: none; }
-  .corridors button {
-    flex: none; border: 1px solid var(--line); background: var(--surface);
-    border-radius: 999px; padding: 7px 13px; cursor: pointer;
-    font-size: 13px; font-weight: 500; white-space: nowrap;
-    display: flex; align-items: center; gap: 6px;
+  .leg:hover { border-color: var(--glow-dim); }
+  .leg .fl { font-size: 20px; line-height: 1; flex: none; }
+  .leg .tx { min-width: 0; }
+  .leg .lb { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .leg .nm {
+    font-size: 13.5px; font-weight: 600; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
   }
-  .corridors button[aria-pressed="true"] {
-    border-color: var(--glow); background: var(--glow-soft); color: var(--glow);
-    font-weight: 700;
+  .swap {
+    flex: none; width: 38px; border: 1px solid var(--line); background: var(--surface-2);
+    border-radius: 12px; cursor: pointer; display: grid; place-items: center;
   }
+  .swap:hover { border-color: var(--glow); color: var(--glow); }
+  .swap svg { width: 16px; height: 16px; }
+
+  .amount-row { display: flex; align-items: center; gap: 10px; }
+  .amount-wrap { flex: 1; min-width: 0; position: relative; }
+  #amount {
+    width: 100%; background: var(--surface); border: 1px solid var(--line);
+    border-radius: 12px; padding: 13px 52px 13px 14px; color: var(--fg);
+    font-family: var(--num); font-size: 19px; font-weight: 500;
+    letter-spacing: -.04em; font-variant-numeric: tabular-nums;
+  }
+  #amount:focus { border-color: var(--glow); outline: none; }
+  #amount.sample { color: var(--muted); }
+  .sym {
+    position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+    font-size: 13px; color: var(--muted); font-weight: 600; pointer-events: none;
+  }
+  .clear {
+    flex: none; width: 44px; height: 44px; border-radius: 12px;
+    border: 1px solid var(--line); background: var(--surface); cursor: pointer;
+    display: grid; place-items: center;
+  }
+  .clear:hover { border-color: var(--loss); color: var(--loss); }
+  .clear svg { width: 16px; height: 16px; }
+  .hintline { font-size: 11px; color: var(--muted); margin-top: 7px; }
+  .hintline b { color: var(--glow); font-weight: 600; }
 
   /* ---------- kontent ---------- */
   .body { flex: 1; min-height: 0; overflow-y: auto; }
-  .pad { padding: 18px; }
+  .pad { padding: 16px 18px 18px; }
 
-  .q { font-size: 13px; color: var(--muted); margin: 0 0 3px; }
-  .hero {
-    margin: 0 0 2px; font-family: var(--num); font-size: 15px;
-    font-weight: 500; letter-spacing: -.03em;
+  .result { margin-bottom: 16px; }
+  .result .k {
+    font-size: 10.5px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: .05em; margin-bottom: 4px;
   }
-  .hero em { font-style: normal; color: var(--glow); }
+  .result .v {
+    font-family: var(--num); font-size: 25px; font-weight: 600; color: var(--glow);
+    letter-spacing: -.045em; font-variant-numeric: tabular-nums; line-height: 1.15;
+  }
+  .result .w { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-  /* ---------- yo'qotish o'lchagichi ---------- */
-  .meter { margin: 18px 0 22px; }
+  .meter { margin: 0 0 20px; }
   .meter-top {
-    display: flex; justify-content: space-between; align-items: baseline;
-    font-size: 11px; color: var(--muted); margin-bottom: 7px;
-    letter-spacing: .03em; text-transform: uppercase;
+    display: flex; justify-content: space-between; font-size: 10px; color: var(--muted);
+    margin-bottom: 6px; letter-spacing: .04em; text-transform: uppercase;
   }
   .track {
-    height: 34px; border-radius: 9px; overflow: hidden;
+    height: 30px; border-radius: 9px; overflow: hidden; display: flex;
     background: var(--surface-2); border: 1px solid var(--line);
-    display: flex; position: relative;
   }
-  .track .keep {
-    background: linear-gradient(90deg, var(--glow-dim), var(--glow));
-    height: 100%;
-  }
+  .track .keep { background: linear-gradient(90deg, var(--glow-dim), var(--glow)); }
   .track .gone {
-    background: repeating-linear-gradient(
-      -45deg, transparent, transparent 4px,
-      color-mix(in srgb, var(--loss) 32%, transparent) 4px,
-      color-mix(in srgb, var(--loss) 32%, transparent) 8px
-    );
-    height: 100%; flex: 1;
+    flex: 1;
+    background: repeating-linear-gradient(-45deg, transparent, transparent 4px,
+      color-mix(in srgb, var(--loss) 34%, transparent) 4px,
+      color-mix(in srgb, var(--loss) 34%, transparent) 8px);
   }
-  .meter-legend {
-    display: flex; justify-content: space-between; gap: 10px;
-    margin-top: 8px; font-size: 12px;
-  }
+  .meter-legend { display: flex; justify-content: space-between; margin-top: 7px; font-size: 11.5px; }
   .meter-legend span { color: var(--muted); }
-  .meter-legend b { font-family: var(--num); font-weight: 500; font-size: 12px; }
+  .meter-legend b { font-family: var(--num); font-weight: 500; font-size: 11.5px; }
   .loss b { color: var(--loss); }
 
-  /* ---------- kanal ro'yxati ---------- */
-  .list { display: flex; flex-direction: column; gap: 8px; }
+  .list { display: flex; flex-direction: column; gap: 7px; }
   .row {
-    border: 1px solid var(--line); background: var(--surface);
-    border-radius: 13px; padding: 13px 14px;
-    display: flex; gap: 12px; align-items: center;
+    border: 1px solid var(--line); background: var(--surface); border-radius: 13px;
+    padding: 12px 13px; display: flex; gap: 11px; align-items: center;
   }
   .row.first {
     border-color: var(--glow);
-    background:
-      radial-gradient(120% 140% at 0% 0%, var(--glow-soft), transparent 62%),
-      var(--surface);
+    background: radial-gradient(120% 140% at 0% 0%, var(--glow-soft), transparent 62%), var(--surface);
   }
   .n {
-    flex: none; width: 26px; height: 26px; border-radius: 50%;
-    display: grid; place-items: center;
-    font-family: var(--num); font-size: 11px; font-weight: 600;
+    flex: none; width: 25px; height: 25px; border-radius: 50%; display: grid;
+    place-items: center; font-family: var(--num); font-size: 10.5px; font-weight: 600;
     background: var(--surface-2); color: var(--muted);
   }
   .row.first .n { background: var(--glow); color: var(--ink); }
   .who { flex: 1; min-width: 0; }
-  .who .nm { font-weight: 600; font-size: 14px; }
-  .who .tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 3px; }
-  .who .tags span { font-size: 10.5px; color: var(--muted); }
+  .who .nm { font-weight: 600; font-size: 13.5px; }
+  .who .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+  .who .tags span { font-size: 10px; color: var(--muted); }
   .who .tags .promo { color: var(--glow); }
   .amt { text-align: right; flex: none; }
   .amt .v {
-    font-family: var(--num); font-size: 14px; font-weight: 500;
+    font-family: var(--num); font-size: 13px; font-weight: 500;
     letter-spacing: -.04em; font-variant-numeric: tabular-nums;
   }
   .row.first .amt .v { color: var(--glow); font-weight: 600; }
-  .amt .d {
-    font-family: var(--num); font-size: 10.5px; color: var(--loss);
-    font-variant-numeric: tabular-nums;
-  }
+  .amt .d { font-family: var(--num); font-size: 10px; color: var(--loss); }
 
   .foot {
-    margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line);
-    font-size: 11.5px; color: var(--muted); line-height: 1.6;
+    margin-top: 16px; padding-top: 13px; border-top: 1px solid var(--line);
+    font-size: 11px; color: var(--muted); line-height: 1.6;
   }
 
-  .empty { padding: 60px 24px; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.6; }
+  /* ---------- usul filtri ---------- */
+  .methods { display: flex; gap: 6px; overflow-x: auto; margin: 0 0 14px; scrollbar-width: none; }
+  .methods::-webkit-scrollbar { display: none; }
+  .methods button {
+    flex: none; border: 1px solid var(--line); background: var(--surface);
+    border-radius: 999px; padding: 6px 11px; cursor: pointer; font-size: 11.5px;
+    white-space: nowrap; font-weight: 500;
+  }
+  .methods button[aria-pressed="true"] {
+    border-color: var(--glow); background: var(--glow-soft); color: var(--glow); font-weight: 700;
+  }
 
   /* ---------- pastki navigatsiya ---------- */
   .nav {
@@ -228,23 +213,13 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   .nav button {
-    border: 0; background: none; cursor: pointer;
-    padding: 9px 4px 11px; display: grid; gap: 3px; justify-items: center;
-    font-size: 10.5px; color: var(--muted); font-weight: 500;
+    border: 0; background: none; cursor: pointer; padding: 8px 4px 10px;
+    display: grid; gap: 3px; justify-items: center; font-size: 10px;
+    color: var(--muted); font-weight: 500;
   }
   .nav button[aria-current="true"] { color: var(--glow); font-weight: 700; }
-  .nav svg { width: 20px; height: 20px; }
+  .nav svg { width: 19px; height: 19px; }
 
-  .fab {
-    position: absolute; right: 18px; bottom: 74px;
-    display: flex; align-items: center; gap: 8px;
-    padding: 12px 18px; border-radius: 999px; border: 0;
-    background: var(--glow); color: #14100a;
-    font-weight: 700; font-size: 13.5px; cursor: pointer;
-    box-shadow: 0 8px 26px color-mix(in srgb, var(--glow) 34%, transparent);
-  }
-
-  /* ---------- maqsadlar ---------- */
   .goal { border: 1px solid var(--line); background: var(--surface); border-radius: 13px; padding: 15px; margin-bottom: 11px; }
   .goal h3 { margin: 0 0 11px; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
   .goal h3 .done { font-size: 11px; color: var(--ok); font-weight: 600; }
@@ -252,79 +227,73 @@
   .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--glow-dim), var(--glow)); }
   .goal .nums {
     display: flex; justify-content: space-between; margin-top: 8px;
-    font-family: var(--num); font-size: 11.5px; font-variant-numeric: tabular-nums;
-    color: var(--muted);
+    font-family: var(--num); font-size: 11px; color: var(--muted);
   }
   .goal .hint { font-size: 11.5px; color: var(--glow); margin-top: 5px; }
 
   /* ---------- panel ---------- */
-  .sheet {
-    position: absolute; inset: 0; z-index: 10; background: var(--ink);
-    display: flex; flex-direction: column;
+  .sheet { position: absolute; inset: 0; z-index: 10; background: var(--ink); display: flex; flex-direction: column; }
+  .search {
+    flex: none; padding: 11px 18px; border-bottom: 1px solid var(--line);
   }
-  label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
-  input, select {
-    width: 100%; padding: 12px 13px; border-radius: 11px;
-    border: 1px solid var(--line); background: var(--surface); color: var(--fg);
-    font-family: var(--num); font-size: 14px;
+  .search input {
+    width: 100%; padding: 11px 13px; border-radius: 11px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--fg); font-family: var(--ui); font-size: 14px;
   }
-  select { font-family: var(--ui); }
-  .field { margin-bottom: 15px; }
-  .help { font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+  .search input:focus { border-color: var(--glow); outline: none; }
+  .clist { display: flex; flex-direction: column; }
+  .citem {
+    width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line);
+    background: none; cursor: pointer; padding: 12px 18px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .citem:hover { background: var(--surface); }
+  .citem[aria-selected="true"] { background: var(--glow-soft); }
+  .citem .fl { font-size: 21px; flex: none; }
+  .citem .nm { flex: 1; font-size: 14px; font-weight: 600; }
+  .citem .cc { font-family: var(--num); font-size: 11px; color: var(--muted); }
+
+  label { display: block; font-size: 10.5px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+  .field { margin-bottom: 14px; }
+  .field input {
+    width: 100%; padding: 12px 13px; border-radius: 11px; border: 1px solid var(--line);
+    background: var(--surface); color: var(--fg); font-family: var(--num); font-size: 13px;
+  }
+  .help { font-size: 11px; color: var(--muted); margin-top: 6px; }
   .primary {
     width: 100%; padding: 13px; border-radius: 12px; border: 0;
     background: var(--glow); color: #14100a; font-weight: 700; cursor: pointer; font-size: 14px;
   }
   .ghost {
     width: 100%; padding: 12px; border-radius: 12px; margin-top: 9px;
-    border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-size: 14px;
+    border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-size: 13.5px;
   }
-  .preview {
-    background: var(--glow-soft); border: 1px solid var(--glow-dim);
-    border-radius: 12px; padding: 15px; margin-bottom: 16px;
-  }
-  .preview .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-  .preview .v {
-    font-family: var(--num); font-size: 22px; font-weight: 600; color: var(--glow);
-    letter-spacing: -.04em; margin-top: 4px; font-variant-numeric: tabular-nums;
-  }
-  .ctx { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; font-size: 13px; margin-bottom: 15px; }
-  .ctx div { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; }
-  .ctx span:first-child { color: var(--muted); }
-  .ctx span:last-child { font-family: var(--num); font-size: 12px; font-variant-numeric: tabular-nums; }
-  .pick { width: 100%; text-align: left; cursor: pointer; margin-bottom: 8px; }
-  .pick:hover { border-color: var(--glow); }
-  ul.checks { list-style: none; padding: 0; margin: 0 0 22px; display: flex; flex-direction: column; gap: 11px; }
+  ul.checks { list-style: none; padding: 0; margin: 0 0 20px; display: flex; flex-direction: column; gap: 10px; }
   ul.checks li { display: flex; gap: 10px; font-size: 13.5px; align-items: flex-start; }
   ul.checks svg { flex: none; width: 16px; height: 16px; color: var(--glow); margin-top: 3px; }
 
   .toast {
-    position: absolute; left: 18px; right: 18px; bottom: 88px; z-index: 30;
-    background: var(--fg); color: var(--ink);
-    padding: 12px 15px; border-radius: 12px; font-size: 13px; font-weight: 500;
+    position: absolute; left: 18px; right: 18px; bottom: 80px; z-index: 30;
+    background: var(--fg); color: var(--ink); padding: 11px 14px; border-radius: 12px;
+    font-size: 12.5px; font-weight: 500;
   }
   :focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
   @media (prefers-reduced-motion: no-preference) {
     .sheet { animation: up .18s ease-out; }
     @keyframes up { from { transform: translateY(12px); opacity: .3 } }
-    .track .keep { transition: width .3s ease-out; }
+    .track .keep { transition: width .25s ease-out; }
   }
 </style>
 
 <div class="app">
   <header class="top">
     <div class="mark">
-      <!-- Chiroq: qorong'ilikdan chiqadigan yorug'lik -->
       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 3a6 6 0 0 0-3.2 11.1V17h6.4v-2.9A6 6 0 0 0 12 3z"
-              stroke="var(--glow)" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M12 3a6 6 0 0 0-3.2 11.1V17h6.4v-2.9A6 6 0 0 0 12 3z" stroke="var(--glow)" stroke-width="1.7" stroke-linejoin="round"/>
         <path d="M9.6 20h4.8" stroke="var(--glow)" stroke-width="1.7" stroke-linecap="round"/>
         <path d="M12 7.5v4" stroke="var(--glow)" stroke-width="1.7" stroke-linecap="round" opacity=".55"/>
       </svg>
-      <span>
-        <b>Chiroq</b>
-        <i>yashirin narxni ko'rsatadi</i>
-      </span>
+      <span><b>Chiroq</b><i>yashirin narxni ko'rsatadi</i></span>
     </div>
     <button class="ico" id="theme" aria-label="Mavzu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -334,36 +303,62 @@
     </button>
   </header>
 
-  <div class="demo"><b>Prototip.</b> Raqamlar o'ylab topilgan — hech narsa o'lchanmagan.</div>
+  <div class="demo">Prototip — raqamlar o'ylab topilgan, o'lchanmagan.</div>
 
-  <nav class="corridors" id="corridors" aria-label="Koridor"></nav>
+  <!-- yo'nalish va summa -->
+  <section class="entry" id="entry">
+    <div class="route">
+      <button class="leg" id="legFrom">
+        <span class="fl" id="flFrom">🇰🇷</span>
+        <span class="tx"><span class="lb">Qayerdan</span><span class="nm" id="nmFrom">Koreya</span></span>
+      </button>
+      <button class="swap" id="swap" aria-label="Yo'nalishni teskari qilish" title="Teskari">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 16l-4-4 4-4M3 12h12M17 8l4 4-4 4M21 12H9"/></svg>
+      </button>
+      <button class="leg" id="legTo">
+        <span class="fl" id="flTo">🇺🇿</span>
+        <span class="tx"><span class="lb">Qayerga</span><span class="nm" id="nmTo">O'zbekiston</span></span>
+      </button>
+    </div>
+
+    <div class="amount-row">
+      <div class="amount-wrap">
+        <input id="amount" inputmode="numeric" autocomplete="off"
+               aria-label="Yuboradigan summa">
+        <span class="sym" id="sym">KRW</span>
+      </div>
+      <button class="clear" id="clear" aria-label="Tozalash" title="Tozalash">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p class="hintline" id="hint"></p>
+  </section>
 
   <!-- ===== KURSLAR ===== -->
   <main class="body" id="t-rates">
     <div class="pad">
-      <p class="q" id="q">Yuborsangiz qancha yetib boradi</p>
-      <p class="hero" id="hero"></p>
+      <div class="result">
+        <div class="k" id="rk">Eng ko'p yetkazadi</div>
+        <div class="v" id="rv">—</div>
+        <div class="w" id="rw"></div>
+      </div>
+
+      <div class="methods" id="methods"></div>
 
       <div class="meter">
-        <div class="meter-top">
-          <span>Eng yaxshi kanal</span><span>Eng yomon</span>
-        </div>
-        <div class="track">
-          <div class="keep" id="keep"></div>
-          <div class="gone"></div>
-        </div>
+        <div class="meter-top"><span>Eng yaxshi</span><span>Eng yomon</span></div>
+        <div class="track"><div class="keep" id="keep"></div><div class="gone"></div></div>
         <div class="meter-legend">
-          <span>Qo'lga tegadi: <b id="kept"></b></span>
-          <span class="loss">Yiliga yo'qoladi: <b id="lost"></b></span>
+          <span>Farq: <b id="spread"></b></span>
+          <span class="loss">Yiliga: <b id="lost"></b></span>
         </div>
       </div>
 
       <div class="list" id="list"></div>
 
       <p class="foot">
-        Tartib faqat qo'lga tekkan summa bo'yicha hisoblanadi.
-        Reklama uchun o'rin sotilmaydi — eng yuqorida turgan kanal eng ko'p
-        to'laydigan emas, eng ko'p pul yetkazadigan kanal.
+        Tartib faqat qo'lga tekkan summa bo'yicha. Reklama uchun o'rin sotilmaydi —
+        eng yuqoridagi kanal eng ko'p to'laydigan emas, eng ko'p pul yetkazadigan.
       </p>
     </div>
   </main>
@@ -373,15 +368,15 @@
     <div class="pad">
       <div class="row" style="cursor:pointer" onclick="openSheet('s-cand')">
         <div class="who">
-          <div class="nm">1 000 000 ₩ · Toss</div>
-          <div class="tags"><span>Kutilmoqda: 8 540 000 so'm</span><span>24-avg 15:00</span></div>
+          <div class="nm">100 000 ₩ · Toss</div>
+          <div class="tags"><span>Kutilmoqda: 854 000 so'm</span><span>24-avg 15:00</span></div>
         </div>
         <div class="n">›</div>
       </div>
       <div class="row" style="cursor:pointer" onclick="toast('Bu o\'tkazma uchun hali bank xabari kelmagan.')">
         <div class="who">
-          <div class="nm">50 000 ₽ · Korona Pay</div>
-          <div class="tags"><span>Kutilmoqda: 7 520 000 so'm</span><span>23-avg 09:20</span></div>
+          <div class="nm">10 000 ₽ · Korona Pay</div>
+          <div class="tags"><span>Kutilmoqda: 1 504 000 so'm</span><span>23-avg 09:20</span></div>
         </div>
         <div class="n">›</div>
       </div>
@@ -408,11 +403,6 @@
     </div>
   </main>
 
-  <button class="fab" id="fab" onclick="openDeclare()">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:16px;height:16px"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>
-    Yubordim
-  </button>
-
   <nav class="nav">
     <button data-tab="rates" aria-current="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M7 16V4M7 4 3 8M7 4l4 4M17 8v12M17 20l4-4M17 20l-4-4"/></svg>
@@ -428,30 +418,16 @@
     </button>
   </nav>
 
-  <!-- ===== YUBORDIM ===== -->
-  <section class="sheet" id="s-declare" hidden>
+  <!-- ===== DAVLAT TANLASH ===== -->
+  <section class="sheet" id="s-country" hidden>
     <header class="top">
       <button class="ico" onclick="closeSheets()" aria-label="Orqaga">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </button>
-      <div class="mark"><span><b style="font-size:16px">Pul yubordim</b></span></div>
+      <div class="mark"><span><b style="font-size:16px" id="pickTitle">Davlat</b></span></div>
     </header>
-    <div class="body"><div class="pad">
-      <div class="field">
-        <label for="amt">Qancha yubordingiz (<span id="cur">KRW</span>)</label>
-        <input id="amt" inputmode="numeric">
-      </div>
-      <div class="field">
-        <label for="chan">Qaysi kanal orqali</label>
-        <select id="chan"></select>
-      </div>
-      <div class="preview">
-        <div class="k">Taxminan yetib boradi</div>
-        <div class="v" id="exp">—</div>
-        <div class="help" style="margin-top:7px">Aniq summa bank xabari kelganda ma'lum bo'ladi.</div>
-      </div>
-      <button class="primary" onclick="closeSheets(); toast('O\'tkazma saqlandi. Bank xabari kelganda bog\'lanadi.')">Saqlash</button>
-    </div></div>
+    <div class="search"><input id="csearch" placeholder="Davlat izlash…" autocomplete="off"></div>
+    <div class="body"><div class="clist" id="clist"></div></div>
   </section>
 
   <!-- ===== QAYSI BIRI ===== -->
@@ -463,25 +439,22 @@
       <div class="mark"><span><b style="font-size:16px">Qaysi biri?</b></span></div>
     </header>
     <div class="body"><div class="pad">
-      <div class="ctx">
-        <div><span>Yuborilgan</span><span>1 000 000 ₩</span></div>
-        <div><span>Kutilgan</span><span>8 540 000 so'm</span></div>
-        <div><span>Kanal</span><span>Toss</span></div>
-      </div>
       <p style="font-weight:700;font-size:14px;margin:0 0 10px">Qaysi tushum shu o'tkazma?</p>
-      <button class="row pick first" onclick="closeSheets(); toast('Bog\'landi. Haqiqiy kurs yozib olindi: 8.545')">
+      <button class="row first" style="width:100%;text-align:left;cursor:pointer;margin-bottom:8px"
+              onclick="closeSheets(); toast('Bog\'landi. Haqiqiy kurs yozib olindi: 8.545')">
         <div class="who">
-          <div class="nm" style="font-family:var(--num);font-size:14px">8 545 000 so'm</div>
+          <div class="nm" style="font-family:var(--num);font-size:13.5px">854 500 so'm</div>
           <div class="tags"><span>Kapitalbank · 24-avg 18:12</span><span class="promo">farq 0.06% — eng mos</span></div>
         </div>
       </button>
-      <button class="row pick" onclick="closeSheets(); toast('Bog\'landi. Haqiqiy kurs yozib olindi: 8.800')">
+      <button class="row" style="width:100%;text-align:left;cursor:pointer"
+              onclick="closeSheets(); toast('Bog\'landi. Haqiqiy kurs yozib olindi: 8.800')">
         <div class="who">
-          <div class="nm" style="font-family:var(--num);font-size:14px">8 800 000 so'm</div>
+          <div class="nm" style="font-family:var(--num);font-size:13.5px">880 000 so'm</div>
           <div class="tags"><span>Kapitalbank · 25-avg 10:40</span><span>farq 3.04%</span></div>
         </div>
       </button>
-      <p class="foot">Ikkita mos xabar bo'lgani uchun avtomatik bog'lanmadi. Noto'g'ri bog'lash moliyaviy tarixni jimgina buzadi — shuning uchun shubhada so'raymiz.</p>
+      <p class="foot">Ikkita mos xabar bo'lgani uchun avtomatik bog'lanmadi. Noto'g'ri bog'lash moliyaviy tarixni jimgina buzadi.</p>
     </div></div>
   </section>
 
@@ -496,12 +469,12 @@
     <div class="body"><div class="pad">
       <div class="field">
         <label for="url">Server manzili</label>
-        <input id="url" value="http://10.0.2.2:3000" style="font-size:13px">
+        <input id="url" value="http://10.0.2.2:3000">
         <p class="help">Emulyator uchun: http://10.0.2.2:3000</p>
       </div>
       <div class="field">
         <label for="hh">Oila kodi</label>
-        <input id="hh" placeholder="nuriddinov-oila" style="font-size:13px;font-family:var(--ui)">
+        <input id="hh" placeholder="nuriddinov-oila" style="font-family:var(--ui)">
         <p class="help">O'tkazma va maqsadlar uchun. Kurslarni ko'rishga shart emas.</p>
       </div>
       <button class="primary" onclick="closeSheets(); toast('Saqlandi.')">Saqlash</button>
@@ -517,8 +490,8 @@
       <div class="mark"><span><b style="font-size:16px">Rozilik</b></span></div>
     </header>
     <div class="body"><div class="pad">
-      <p style="font-size:21px;font-weight:800;letter-spacing:-.02em;margin:10px 0 12px">Birgalikda maqsadga</p>
-      <p style="margin:0 0 20px;line-height:1.65;font-size:14px">
+      <p style="font-size:20px;font-weight:800;letter-spacing:-.02em;margin:10px 0 12px">Birgalikda maqsadga</p>
+      <p style="margin:0 0 18px;line-height:1.65;font-size:13.5px">
         Oilangiz bilan bitta maqsad qo'yasiz — uy ta'miri, to'y yoki o'qish puli.
         Ilova bankdan keladigan xabarlarni o'qib, maqsadga qancha yig'ilganini ko'rsatadi.
       </p>
@@ -535,176 +508,370 @@
 </div>
 
 <script>
-  // Namunaviy ma'lumot. Kurslar koridor registri bilan mos oraliqda —
-  // o'lchanmagan, lekin aqlga sig'adigan.
-  var DATA = {
-    'KR-UZ': {
-      flags: '🇰🇷', label: 'Koreya', cur: 'KRW', sym: '₩', base: 1000000, sendDec: 0,
-      rows: [
-        { n: 'Toss',          v: 8540000, eta: '2 soat' },
-        { n: 'Sentbe',        v: 8465000, eta: '4 soat' },
-        { n: 'Hanpass',       v: 8390000, eta: '6 soat', promo: true },
-        { n: 'GME',           v: 8310000, eta: '1 kun' },
-        { n: 'Cross',         v: 8275000, eta: '12 soat', stale: 9 },
-        { n: 'KEB Hana Bank', v: 8050000, eta: '2 kun' }
-      ]
-    },
-    'RU-UZ': {
-      flags: '🇷🇺', label: 'Rossiya', cur: 'RUB', sym: '₽', base: 50000, sendDec: 0,
-      rows: [
-        { n: 'Korona Pay',    v: 7520000, eta: '15 daqiqa' },
-        { n: 'Unistream',     v: 7440000, eta: '1 soat' },
-        { n: 'Contact',       v: 7310000, eta: '2 soat' },
-        { n: 'Sberbank',      v: 7150000, eta: '1 kun' },
-        { n: 'Western Union', v: 6980000, eta: '1 soat', stale: 7 }
-      ]
-    },
-    'KZ-UZ': {
-      flags: '🇰🇿', label: "Qozog'iston", cur: 'KZT', sym: '₸', base: 500000, sendDec: 0,
-      rows: [
-        { n: 'Kaspi',         v: 12150000, eta: '20 daqiqa' },
-        { n: 'Halyk Bank',    v: 11980000, eta: '2 soat' },
-        { n: 'Korona Pay',    v: 11850000, eta: '30 daqiqa' },
-        { n: 'Western Union', v: 11400000, eta: '1 soat' }
-      ]
-    },
-    'US-UZ': {
-      flags: '🇺🇸', label: 'AQSh', cur: 'USD', sym: '$', base: 1000, sendDec: 0,
-      rows: [
-        { n: 'Wise',          v: 12030000, eta: '1 kun' },
-        { n: 'Remitly',       v: 11920000, eta: '2 soat', promo: true },
-        { n: 'Western Union', v: 11650000, eta: '1 soat' },
-        { n: 'MoneyGram',     v: 11500000, eta: '1 soat' }
-      ]
-    },
-    'TR-UZ': {
-      flags: '🇹🇷', label: 'Turkiya', cur: 'TRY', sym: '₺', base: 10000, sendDec: 0,
-      rows: [
-        { n: 'Wise',          v: 3020000, eta: '1 kun' },
-        { n: 'Western Union', v: 2940000, eta: '1 soat' },
-        { n: 'Ria',           v: 2890000, eta: '2 soat' }
-      ]
-    }
-  };
+// ===== Ma'lumot: backenddagi registrning ko'chirmasi =====
+var C = {
+  UZ:{n:"O'zbekiston",c:'UZS',f:'🇺🇿'}, KR:{n:'Koreya',c:'KRW',f:'🇰🇷'},
+  RU:{n:'Rossiya',c:'RUB',f:'🇷🇺'},     KZ:{n:"Qozog'iston",c:'KZT',f:'🇰🇿'},
+  KG:{n:"Qirg'iziston",c:'KGS',f:'🇰🇬'},TJ:{n:'Tojikiston',c:'TJS',f:'🇹🇯'},
+  US:{n:'AQSh',c:'USD',f:'🇺🇸'},        TR:{n:'Turkiya',c:'TRY',f:'🇹🇷'},
+  AE:{n:'BAA',c:'AED',f:'🇦🇪'},         SA:{n:'Saudiya',c:'SAR',f:'🇸🇦'},
+  QA:{n:'Qatar',c:'QAR',f:'🇶🇦'},       KW:{n:'Kuvayt',c:'KWD',f:'🇰🇼'},
+  IL:{n:'Isroil',c:'ILS',f:'🇮🇱'},      PL:{n:'Polsha',c:'PLN',f:'🇵🇱'},
+  CZ:{n:'Chexiya',c:'CZK',f:'🇨🇿'},     GB:{n:'Buyuk Britaniya',c:'GBP',f:'🇬🇧'},
+  DE:{n:'Germaniya',c:'EUR',f:'🇩🇪'},   IT:{n:'Italiya',c:'EUR',f:'🇮🇹'},
+  FR:{n:'Fransiya',c:'EUR',f:'🇫🇷'},    LT:{n:'Litva',c:'EUR',f:'🇱🇹'},
+  LV:{n:'Latviya',c:'EUR',f:'🇱🇻'},     JP:{n:'Yaponiya',c:'JPY',f:'🇯🇵'},
+  CN:{n:'Xitoy',c:'CNY',f:'🇨🇳'},       MY:{n:'Malayziya',c:'MYR',f:'🇲🇾'},
+  CA:{n:'Kanada',c:'CAD',f:'🇨🇦'},      AZ:{n:'Ozarbayjon',c:'AZN',f:'🇦🇿'},
+  GE:{n:'Gruziya',c:'GEL',f:'🇬🇪'},     BY:{n:'Belarus',c:'BYN',f:'🇧🇾'},
+  TH:{n:'Tailand',c:'THB',f:'🇹🇭'},     SE:{n:'Shvetsiya',c:'SEK',f:'🇸🇪'}
+};
+// Valyuta: [1 USD uchun necha birlik, kasr raqamlari, belgi]
+var CUR = {
+  UZS:[12034,2,"so'm"], KRW:[1400,0,'₩'],  RUB:[80,2,'₽'],   KZT:[500,2,'₸'],
+  USD:[1,2,'$'],        EUR:[0.92,2,'€'],  TRY:[40,2,'₺'],   KGS:[87,2,'som'],
+  TJS:[10.9,2,'SM'],    AED:[3.67,2,'AED'],SAR:[3.75,2,'SAR'],QAR:[3.64,2,'QAR'],
+  KWD:[0.31,3,'KWD'],   ILS:[3.7,2,'₪'],   PLN:[4,2,'zł'],   CZK:[23,2,'Kč'],
+  GBP:[0.79,2,'£'],     JPY:[150,0,'¥'],   CNY:[7.1,2,'¥'],  MYR:[4.2,2,'RM'],
+  CAD:[1.36,2,'C$'],    AZN:[1.7,2,'₼'],   GEL:[2.7,2,'₾'],  BYN:[3.3,2,'Br'],
+  THB:[34,2,'฿'],       SEK:[10.5,2,'kr']
+};
 
-  var current = 'KR-UZ';
+var TO_UZ = ['RU','KR','KZ','TR','US','AE','SA','QA','KW','IL','PL','CZ','GB',
+             'DE','JP','KG','TJ','AZ','GE','MY','IT','FR','CA','SE','LT','LV','CN'];
+var FROM_UZ = ['RU','KR','KZ','TR','US','AE','DE','GB','CN','JP'];
+var EXTRA = [['RU','KG'],['RU','TJ'],['KZ','KG']];
 
-  function group(n) {
-    return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-  }
+var CORRIDORS = {};
+TO_UZ.forEach(function(a){ CORRIDORS[a+'-UZ'] = true; });
+FROM_UZ.forEach(function(b){ CORRIDORS['UZ-'+b] = true; });
+EXTRA.forEach(function(p){ CORRIDORS[p[0]+'-'+p[1]] = true; });
 
-  function renderCorridors() {
-    var html = '';
-    Object.keys(DATA).forEach(function (id) {
-      var d = DATA[id];
-      html += '<button data-c="' + id + '" aria-pressed="' + (id === current) + '">' +
-        '<span>' + d.flags + '🇺🇿</span>' + d.label + '</button>';
-    });
-    var el = document.getElementById('corridors');
-    el.innerHTML = html;
-    el.querySelectorAll('button').forEach(function (b) {
-      b.addEventListener('click', function () {
-        current = b.dataset.c;
-        renderCorridors();
-        renderRates();
-      });
-    });
-  }
+// Provayderlar: davlat -> [nom, usul, tezlik]
+var P = {
+  KR:[['Toss','CARD','2 soat'],['Sentbe','CARD','4 soat'],['Hanpass','CASH_PICKUP','6 soat'],
+      ['GME','CASH_DELIVERY','1 kun'],['Cross','CARD','12 soat'],['WireBarley','BANK_ACCOUNT','1 kun'],
+      ['E9pay','CARD','5 soat'],['GmoneyTrans','CASH_PICKUP','8 soat'],['KEB Hana Bank','BANK_ACCOUNT','2 kun']],
+  RU:[['Korona Pay','CARD','15 daqiqa'],['Unistream','CASH_PICKUP','1 soat'],['Zolotaya Korona','CARD','30 daqiqa'],
+      ['Contact','CASH_PICKUP','2 soat'],['T-Bank','CARD','20 daqiqa'],['Sberbank','BANK_ACCOUNT','1 kun'],
+      ['Alfa-Bank','CARD','1 soat'],['Western Union','CASH_PICKUP','1 soat']],
+  KZ:[['Kaspi','CARD','20 daqiqa'],['Korona Pay','CARD','30 daqiqa'],['Halyk Bank','BANK_ACCOUNT','2 soat'],
+      ['Freedom Pay','CARD','1 soat'],['Western Union','CASH_PICKUP','1 soat']],
+  US:[['Wise','BANK_ACCOUNT','1 kun'],['Remitly','CARD','2 soat'],['Paysend','CARD','1 soat'],
+      ['TapTap Send','CARD','30 daqiqa'],['Western Union','CASH_PICKUP','1 soat'],['MoneyGram','CASH_PICKUP','1 soat'],
+      ['Ria Money','CASH_PICKUP','2 soat'],['Zenith / Xoom','BANK_ACCOUNT','1 kun']],
+  TR:[['Wise','BANK_ACCOUNT','1 kun'],['Western Union','CASH_PICKUP','1 soat'],['Ria Money','CASH_PICKUP','2 soat'],
+      ['Unistream','CARD','2 soat'],['Paysend','CARD','1 soat']],
+  AE:[['Al Ansari','CASH_PICKUP','1 soat'],['LuLu Exchange','CASH_PICKUP','1 soat'],['Wise','BANK_ACCOUNT','1 kun'],
+      ['Remitly','CARD','2 soat'],['Western Union','CASH_PICKUP','1 soat']],
+  SA:[['Enjaz','CASH_PICKUP','1 soat'],['stc pay','CARD','30 daqiqa'],['Remitly','CARD','2 soat'],
+      ['Western Union','CASH_PICKUP','1 soat']],
+  QA:[['LuLu Exchange','CASH_PICKUP','1 soat'],['Western Union','CASH_PICKUP','1 soat'],['MoneyGram','CASH_PICKUP','1 soat']],
+  KW:[['LuLu Exchange','CASH_PICKUP','1 soat'],['Western Union','CASH_PICKUP','1 soat'],['MoneyGram','CASH_PICKUP','1 soat']],
+  IL:[['GMT','CASH_PICKUP','1 soat'],['Western Union','CASH_PICKUP','1 soat'],['MoneyGram','CASH_PICKUP','1 soat']],
+  PL:[['Wise','BANK_ACCOUNT','1 kun'],['Profee','CARD','1 soat'],['Paysend','CARD','1 soat'],
+      ['Western Union','CASH_PICKUP','1 soat'],['Revolut','BANK_ACCOUNT','1 kun']],
+  CZ:[['Wise','BANK_ACCOUNT','1 kun'],['Profee','CARD','1 soat'],['Ria Money','CASH_PICKUP','2 soat'],['Revolut','BANK_ACCOUNT','1 kun']],
+  GB:[['Wise','BANK_ACCOUNT','1 kun'],['Remitly','CARD','2 soat'],['Revolut','BANK_ACCOUNT','1 kun'],
+      ['Paysend','CARD','1 soat'],['Western Union','CASH_PICKUP','1 soat'],['TapTap Send','CARD','30 daqiqa']],
+  DE:[['Wise','BANK_ACCOUNT','1 kun'],['Remitly','CARD','2 soat'],['Profee','CARD','1 soat'],
+      ['Revolut','BANK_ACCOUNT','1 kun'],['Western Union','CASH_PICKUP','1 soat']],
+  IT:[['Wise','BANK_ACCOUNT','1 kun'],['Remitly','CARD','2 soat'],['Profee','CARD','1 soat'],['Ria Money','CASH_PICKUP','2 soat']],
+  FR:[['Wise','BANK_ACCOUNT','1 kun'],['Profee','CARD','1 soat'],['Western Union','CASH_PICKUP','1 soat']],
+  LT:[['Wise','BANK_ACCOUNT','1 kun'],['Profee','CARD','1 soat'],['Revolut','BANK_ACCOUNT','1 kun']],
+  LV:[['Wise','BANK_ACCOUNT','1 kun'],['Profee','CARD','1 soat'],['Revolut','BANK_ACCOUNT','1 kun']],
+  SE:[['Wise','BANK_ACCOUNT','1 kun'],['Remitly','CARD','2 soat'],['Profee','CARD','1 soat']],
+  JP:[['SBI Remit','CARD','3 soat'],['Seven Bank','BANK_ACCOUNT','1 kun'],['Wise','BANK_ACCOUNT','1 kun']],
+  CN:[['Alipay','WALLET','1 soat'],['Western Union','CASH_PICKUP','1 soat']],
+  MY:[['Merchantrade','CASH_PICKUP','1 soat'],['Western Union','CASH_PICKUP','1 soat']],
+  CA:[['Wise','BANK_ACCOUNT','1 kun'],['Remitly','CARD','2 soat'],['Western Union','CASH_PICKUP','1 soat']],
+  AZ:[['Korona Pay','CARD','30 daqiqa'],['Western Union','CASH_PICKUP','1 soat']],
+  GE:[['Korona Pay','CARD','30 daqiqa'],['Western Union','CASH_PICKUP','1 soat']],
+  KG:[['Korona Pay','CARD','30 daqiqa'],['MBANK','CARD','20 daqiqa']],
+  TJ:[['Korona Pay','CARD','30 daqiqa'],['Alif Bank','CARD','1 soat']],
+  UZ:[['Humo','CARD','1 soat'],['Uzcard','CARD','1 soat'],['Payme','WALLET','30 daqiqa'],
+      ['Click','WALLET','30 daqiqa'],['TBC Bank','CARD','1 soat'],['Uzum Bank','CARD','1 soat'],
+      ['Kapitalbank','BANK_ACCOUNT','1 kun'],['Milliy bank','BANK_ACCOUNT','2 kun'],['SWIFT (bank)','BANK_ACCOUNT','3 kun']]
+};
 
-  function renderRates() {
-    var d = DATA[current];
-    var rows = d.rows.slice().sort(function (a, b) { return b.v - a.v; });
-    var best = rows[0].v, worst = rows[rows.length - 1].v;
+var METHODS = {
+  ALL:'Hammasi', CARD:'Kartaga', BANK_ACCOUNT:'Bank hisobiga',
+  CASH_PICKUP:'Naqd olish', CASH_DELIVERY:'Uyga yetkazish', WALLET:'Mobil hamyon'
+};
 
-    document.getElementById('hero').innerHTML =
-      group(d.base) + ' ' + d.sym + ' → <em>' + group(best) + " so'm</em>";
+var from = 'KR', to = 'UZ', method = 'ALL', userTyped = false, picking = 'from';
 
-    // O'lchagich: eng yomon kanal eng yaxshisining necha foizini yetkazadi
-    var keepPct = (worst / best) * 100;
-    document.getElementById('keep').style.width = keepPct.toFixed(1) + '%';
-    document.getElementById('kept').textContent = group(best) + " so'm";
-    document.getElementById('lost').textContent = group((best - worst) * 12) + " so'm";
+function cur(code){ return CUR[code]; }
+function dec(code){ return cur(code)[1]; }
+function sym(code){ return cur(code)[2]; }
+function mid(a,b){ return cur(b)[0] / cur(a)[0]; }
 
-    var html = '';
-    rows.forEach(function (r, i) {
-      var gap = i === 0 ? '' : ((r.v / best - 1) * 100).toFixed(1) + '%';
-      var tags = [];
-      if (r.promo) tags.push('<span class="promo">promo</span>');
-      if (r.stale) tags.push('<span>' + r.stale + ' soat oldin</span>');
-      if (r.eta) tags.push('<span>' + r.eta + '</span>');
-      html +=
-        '<div class="row' + (i === 0 ? ' first' : '') + '">' +
-          '<div class="n">' + (i + 1) + '</div>' +
-          '<div class="who"><div class="nm">' + r.n + '</div>' +
-            '<div class="tags">' + tags.join('') + '</div></div>' +
-          '<div class="amt"><div class="v">' + group(r.v) + '</div>' +
-            (gap ? '<div class="d">' + gap + '</div>' : '') + '</div>' +
-        '</div>';
-    });
-    document.getElementById('list').innerHTML = html;
+function group(n, digits){
+  var s = Math.round(n).toString();
+  return s.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
 
-    // "Yubordim" ekranini ham joriy koridorga moslaymiz
-    document.getElementById('cur').textContent = d.cur;
-    document.getElementById('amt').value = String(d.base);
-    document.getElementById('chan').innerHTML = rows.map(function (r) {
-      return '<option value="' + r.n + '">' + r.n + '</option>';
-    }).join('');
-    recalc();
-  }
-
-  function recalc() {
-    var d = DATA[current];
-    var raw = document.getElementById('amt').value.replace(/[^0-9]/g, '');
-    var sent = parseInt(raw || '0', 10);
-    var name = document.getElementById('chan').value;
-    var row = d.rows.filter(function (r) { return r.n === name; })[0];
-    var out = document.getElementById('exp');
-    if (!sent || !row) { out.textContent = '—'; return; }
-    out.textContent = group(row.v * sent / d.base) + " so'm";
-  }
-
-  var TITLES = { rates: 'rates', pending: 'pending', goals: 'goals' };
-  function showTab(name) {
-    Object.keys(TITLES).forEach(function (t) {
-      document.getElementById('t-' + t).hidden = (t !== name);
-    });
-    document.querySelectorAll('.nav button').forEach(function (b) {
-      b.setAttribute('aria-current', b.dataset.tab === name ? 'true' : 'false');
-    });
-    document.getElementById('corridors').hidden = (name !== 'rates');
-    document.getElementById('fab').hidden = (name === 'goals');
-  }
-  document.querySelectorAll('.nav button').forEach(function (b) {
-    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+/** Namunaviy summa: ~100 USD, 1/2/5 x 10^n ko'rinishida yumaloqlangan */
+function sample(code){
+  var raw = 100 * cur(code)[0];
+  var e = Math.floor(Math.log10(raw)), b = Math.pow(10, e);
+  return [b, b*2, b*5, b*10].reduce(function(x,y){
+    return Math.abs(y-raw) < Math.abs(x-raw) ? y : x;
   });
+}
 
-  function openSheet(id) { document.getElementById(id).hidden = false; }
-  function closeSheets() {
-    document.querySelectorAll('.sheet').forEach(function (s) { s.hidden = true; });
-  }
-  function openDeclare() { recalc(); openSheet('s-declare'); }
-  document.getElementById('gear').addEventListener('click', function () { openSheet('s-settings'); });
+/** Deterministik "soxta" kurslar — koridor va kanal nomidan hosil qilinadi */
+function hash(s){
+  var h = 2166136261;
+  for (var i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return ((h >>> 0) % 1000) / 1000;
+}
 
-  var tt;
-  function toast(msg) {
-    var el = document.createElement('div');
-    el.className = 'toast';
-    el.textContent = msg;
-    document.querySelector('.app').appendChild(el);
-    clearTimeout(tt);
-    tt = setTimeout(function () { el.remove(); }, 3200);
-  }
-
-  document.getElementById('theme').addEventListener('click', function () {
-    var cur = document.documentElement.getAttribute('data-theme');
-    var dark = cur ? cur === 'dark'
-      : !window.matchMedia('(prefers-color-scheme: light)').matches;
-    document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+function rows(){
+  var key = from + '-' + to;
+  if (!CORRIDORS[key]) return [];
+  var list = P[from] || [];
+  var base = mid(C[from].c, C[to].c);
+  var out = list.map(function(p, i){
+    // Har bir kanal mid-market kursdan 0.4%..6.5% past beradi
+    var markup = 0.004 + hash(key + p[0]) * 0.061;
+    return {
+      n: p[0], method: p[1], eta: p[2],
+      rate: base * (1 - markup),
+      promo: hash('promo' + key + p[0]) > 0.88,
+      stale: hash('stale' + key + p[0]) > 0.93 ? 7 + Math.floor(hash('h'+p[0])*6) : 0
+    };
   });
+  if (method !== 'ALL') out = out.filter(function(r){ return r.method === method; });
+  return out.sort(function(a,b){ return b.rate - a.rate; });
+}
 
-  document.getElementById('amt').addEventListener('input', recalc);
-  document.getElementById('chan').addEventListener('change', recalc);
+function amountValue(){
+  var raw = document.getElementById('amount').value.replace(/[^\d]/g, '');
+  var n = parseInt(raw || '0', 10);
+  return isFinite(n) && n > 0 ? n : 0;
+}
 
-  renderCorridors();
-  renderRates();
+function render(){
+  var sendC = C[from].c, recvC = C[to].c;
+  document.getElementById('flFrom').textContent = C[from].f;
+  document.getElementById('nmFrom').textContent = C[from].n;
+  document.getElementById('flTo').textContent = C[to].f;
+  document.getElementById('nmTo').textContent = C[to].n;
+  document.getElementById('sym').textContent = sendC;
+
+  var amt = amountValue();
+  var rs = rows();
+
+  var hint = document.getElementById('hint');
+  if (!userTyped) {
+    hint.innerHTML = '<b>Namunaviy summa.</b> O\'chirib o\'z summangizni kiriting.';
+  } else {
+    hint.textContent = rs.length + ' kanal taqqoslandi · ' + METHODS[method];
+  }
+
+  if (rs.length === 0 || amt === 0) {
+    document.getElementById('rv').textContent = '—';
+    document.getElementById('rw').textContent = rs.length === 0
+      ? 'Bu yo\'nalish uchun kanal yo\'q'
+      : 'Summa kiriting';
+    document.getElementById('list').innerHTML = '';
+    document.getElementById('keep').style.width = '0%';
+    document.getElementById('spread').textContent = '—';
+    document.getElementById('lost').textContent = '—';
+    renderMethods();
+    return;
+  }
+
+  var best = rs[0].rate * amt, worst = rs[rs.length-1].rate * amt;
+
+  document.getElementById('rv').textContent = group(best) + ' ' + sym(recvC);
+  document.getElementById('rw').textContent =
+    rs[0].n + ' · ' + METHODS[rs[0].method] + ' · ' + rs[0].eta;
+
+  var keepPct = rs.length > 1 ? (worst / best) * 100 : 100;
+  document.getElementById('keep').style.width = keepPct.toFixed(1) + '%';
+  document.getElementById('spread').textContent =
+    rs.length > 1 ? ((best/worst - 1) * 100).toFixed(1) + '%' : '—';
+  document.getElementById('lost').textContent =
+    rs.length > 1 ? group((best - worst) * 12) + ' ' + sym(recvC) : '—';
+
+  var html = '';
+  rs.forEach(function(r, i){
+    var v = r.rate * amt;
+    var gap = i === 0 ? '' : ((v / best - 1) * 100).toFixed(1) + '%';
+    var tags = ['<span>' + METHODS[r.method] + '</span>'];
+    if (r.promo) tags.push('<span class="promo">promo</span>');
+    if (r.stale) tags.push('<span>' + r.stale + ' soat oldin</span>');
+    tags.push('<span>' + r.eta + '</span>');
+    html +=
+      '<div class="row' + (i===0 ? ' first' : '') + '">' +
+        '<div class="n">' + (i+1) + '</div>' +
+        '<div class="who"><div class="nm">' + r.n + '</div>' +
+          '<div class="tags">' + tags.join('') + '</div></div>' +
+        '<div class="amt"><div class="v">' + group(v) + '</div>' +
+          (gap ? '<div class="d">' + gap + '</div>' : '') + '</div>' +
+      '</div>';
+  });
+  document.getElementById('list').innerHTML = html;
+  renderMethods();
+}
+
+function renderMethods(){
+  var avail = {};
+  (P[from] || []).forEach(function(p){
+    if (CORRIDORS[from+'-'+to]) avail[p[1]] = true;
+  });
+  var keys = ['ALL'].concat(Object.keys(METHODS).filter(function(k){
+    return k !== 'ALL' && avail[k];
+  }));
+  document.getElementById('methods').innerHTML = keys.map(function(k){
+    return '<button data-m="' + k + '" aria-pressed="' + (k===method) + '">' +
+      METHODS[k] + '</button>';
+  }).join('');
+  document.querySelectorAll('#methods button').forEach(function(b){
+    b.addEventListener('click', function(){
+      method = b.dataset.m;
+      render();
+    });
+  });
+}
+
+function resetAmount(){
+  var el = document.getElementById('amount');
+  el.value = group(sample(C[from].c));
+  el.classList.add('sample');
+  userTyped = false;
+}
+
+// ---- davlat tanlash ----
+function openPicker(which){
+  picking = which;
+  document.getElementById('pickTitle').textContent =
+    which === 'from' ? 'Qayerdan' : 'Qayerga';
+  document.getElementById('csearch').value = '';
+  renderCountryList('');
+  openSheet('s-country');
+  setTimeout(function(){ document.getElementById('csearch').focus(); }, 60);
+}
+
+function optionsFor(which){
+  var set = {};
+  Object.keys(CORRIDORS).forEach(function(k){
+    var p = k.split('-');
+    if (which === 'from') set[p[0]] = true;
+    else if (p[0] === from) set[p[1]] = true;
+  });
+  return Object.keys(set).sort(function(a,b){ return C[a].n.localeCompare(C[b].n); });
+}
+
+function renderCountryList(q){
+  var opts = optionsFor(picking).filter(function(code){
+    return C[code].n.toLowerCase().indexOf(q.toLowerCase()) !== -1 ||
+           code.toLowerCase().indexOf(q.toLowerCase()) !== -1;
+  });
+  var cur = picking === 'from' ? from : to;
+  document.getElementById('clist').innerHTML = opts.map(function(code){
+    return '<button class="citem" data-c="' + code + '" aria-selected="' + (code===cur) + '">' +
+      '<span class="fl">' + C[code].f + '</span>' +
+      '<span class="nm">' + C[code].n + '</span>' +
+      '<span class="cc">' + C[code].c + '</span></button>';
+  }).join('') || '<p class="pad" style="color:var(--muted)">Topilmadi</p>';
+
+  document.querySelectorAll('#clist .citem').forEach(function(b){
+    b.addEventListener('click', function(){
+      var code = b.dataset.c;
+      if (picking === 'from') {
+        from = code;
+        var allowed = optionsFor('to');
+        if (allowed.indexOf(to) === -1) to = allowed[0];
+        resetAmount();
+      } else {
+        to = code;
+      }
+      method = 'ALL';
+      closeSheets();
+      render();
+    });
+  });
+}
+
+// ---- navigatsiya ----
+function showTab(name){
+  ['rates','pending','goals'].forEach(function(t){
+    document.getElementById('t-' + t).hidden = (t !== name);
+  });
+  document.querySelectorAll('.nav button').forEach(function(b){
+    b.setAttribute('aria-current', b.dataset.tab === name ? 'true' : 'false');
+  });
+  document.getElementById('entry').hidden = (name !== 'rates');
+}
+document.querySelectorAll('.nav button').forEach(function(b){
+  b.addEventListener('click', function(){ showTab(b.dataset.tab); });
+});
+
+function openSheet(id){ document.getElementById(id).hidden = false; }
+function closeSheets(){
+  document.querySelectorAll('.sheet').forEach(function(s){ s.hidden = true; });
+}
+document.getElementById('gear').addEventListener('click', function(){ openSheet('s-settings'); });
+
+var tt;
+function toast(msg){
+  var el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg;
+  document.querySelector('.app').appendChild(el);
+  clearTimeout(tt);
+  tt = setTimeout(function(){ el.remove(); }, 3200);
+}
+
+document.getElementById('theme').addEventListener('click', function(){
+  var c = document.documentElement.getAttribute('data-theme');
+  var dark = c ? c === 'dark' : !window.matchMedia('(prefers-color-scheme: light)').matches;
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+});
+
+document.getElementById('legFrom').addEventListener('click', function(){ openPicker('from'); });
+document.getElementById('legTo').addEventListener('click', function(){ openPicker('to'); });
+
+document.getElementById('swap').addEventListener('click', function(){
+  var key = to + '-' + from;
+  if (!CORRIDORS[key]) { toast('Teskari yo\'nalish hali qo\'shilmagan.'); return; }
+  var t = from; from = to; to = t;
+  method = 'ALL';
+  resetAmount();
+  render();
+});
+
+var amountEl = document.getElementById('amount');
+amountEl.addEventListener('input', function(){
+  userTyped = true;
+  amountEl.classList.remove('sample');
+  var pos = amountEl.selectionStart, before = amountEl.value.length;
+  var digits = amountEl.value.replace(/[^\d]/g, '');
+  amountEl.value = digits ? group(parseInt(digits, 10)) : '';
+  // Kursorni probel qo'shilgandan keyin joyida saqlaymiz
+  var diff = amountEl.value.length - before;
+  amountEl.setSelectionRange(Math.max(0, pos + diff), Math.max(0, pos + diff));
+  render();
+});
+// Namunaviy qiymat bosilganda butunlay tanlanadi — o'chirish oson
+amountEl.addEventListener('focus', function(){
+  if (!userTyped) amountEl.select();
+});
+
+document.getElementById('clear').addEventListener('click', function(){
+  amountEl.value = '';
+  userTyped = true;
+  amountEl.classList.remove('sample');
+  amountEl.focus();
+  render();
+});
+
+document.getElementById('csearch').addEventListener('input', function(e){
+  renderCountryList(e.target.value);
+});
+
+resetAmount();
+render();
 </script>

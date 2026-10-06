@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/comparison.dart';
+import '../models/corridor.dart';
 import '../models/goal.dart';
 
 class ApiException implements Exception {
@@ -18,15 +19,48 @@ class ApiClient {
   ApiClient(this.baseUrl, {http.Client? client})
       : _http = client ?? http.Client();
 
-  Future<Comparison> comparison() async {
-    final r = await _http.get(Uri.parse('$baseUrl/rates/compare'));
+  /// Taqqoslash. `amountMajor` berilsa, shu summa uchun hisoblanadi;
+  /// berilmasa server koridorning namunaviy qiymatini ishlatadi.
+  Future<Comparison> comparison(String corridorId, {String? amountMajor}) async {
+    final q = amountMajor != null && amountMajor.isNotEmpty
+        ? '?amount=${Uri.encodeQueryComponent(amountMajor)}'
+        : '';
+    final r = await _http.get(Uri.parse('$baseUrl/rates/compare/$corridorId$q'));
     if (r.statusCode != 200) throw ApiException(r.statusCode, r.body);
     return Comparison.fromJson(jsonDecode(r.body) as Map<String, dynamic>);
   }
 
+  /// Yuborish davlatlari va ularning yo'nalishlari
+  Future<List<SendOption>> countries() async {
+    final r = await _http.get(Uri.parse('$baseUrl/rates/countries'));
+    if (r.statusCode != 200) throw ApiException(r.statusCode, r.body);
+    return (jsonDecode(r.body) as List)
+        .map((e) => SendOption.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<CorridorInfo>> corridors() async {
+    final r = await _http.get(Uri.parse('$baseUrl/rates/corridors'));
+    if (r.statusCode != 200) throw ApiException(r.statusCode, r.body);
+    return (jsonDecode(r.body) as List)
+        .map((e) => CorridorInfo.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<Map<String, List<MethodInfo>>> methods() async {
+    final r = await _http.get(Uri.parse('$baseUrl/rates/methods'));
+    if (r.statusCode != 200) throw ApiException(r.statusCode, r.body);
+    final j = jsonDecode(r.body) as Map<String, dynamic>;
+    List<MethodInfo> parse(String k) => (j[k] as List? ?? [])
+        .map((e) => MethodInfo.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return {'payouts': parse('payouts'), 'funding': parse('funding')};
+  }
+
   Future<String> declareTransfer({
     required String householdId,
-    required BigInt sentMinorKrw,
+    required String corridorId,
+    required BigInt sentMinor,
     String? providerSlug,
   }) async {
     final r = await _http.post(
@@ -34,7 +68,8 @@ class ApiClient {
       headers: {'content-type': 'application/json'},
       body: jsonEncode({
         'householdId': householdId,
-        'sentMinor': sentMinorKrw.toString(),
+        'corridorId': corridorId,
+        'sentMinor': sentMinor.toString(),
         if (providerSlug != null) 'providerSlug': providerSlug,
       }),
     );

@@ -32,19 +32,60 @@ describe('buildComparison', () => {
     expect(r.rows[0].providerSlug).toBe('poor');
   });
 
-  it('har xil yuborilgan summani koridor bazasiga keltiradi', () => {
+  it('har xil yuborilgan summani so\'ralgan summaga keltiradi', () => {
     const r = buildComparison(
       KR_UZ,
       [provider('a'), provider('b')],
       [
         // 500 000 KRW uchun 4 270 000 so'm = 1 mln uchun 8 540 000
         quote('a', 4_270_000, { sendMajor: 500_000, fetchedAt: ago(1) }),
-        quote('b', 8_500_000, { fetchedAt: ago(1) }),
+        quote('b', 8_500_000, { sendMajor: 1_000_000, fetchedAt: ago(1) }),
       ],
       NOW,
+      toMinor(1_000_000, 'KRW'),
     );
     expect(r.rows[0].providerSlug).toBe('a');
     expect(r.rows[0].recvNormalizedMinor).toBe(toMinor(8_540_000, 'UZS'));
+  });
+
+  it('foydalanuvchi kiritgan summa uchun qayta hisoblaydi', () => {
+    const quotes = [
+      quote('a', 8_540_000, { sendMajor: 1_000_000, fetchedAt: ago(1) }),
+      quote('b', 8_100_000, { sendMajor: 1_000_000, fetchedAt: ago(1) }),
+    ];
+    const providers = [provider('a'), provider('b')];
+
+    // 1 mln KRW uchun
+    const one = buildComparison(KR_UZ, providers, quotes, NOW, toMinor(1_000_000, 'KRW'));
+    expect(one.rows[0].recvNormalizedMinor).toBe(toMinor(8_540_000, 'UZS'));
+    expect(one.isSample).toBe(false);
+
+    // 2.5 mln KRW uchun — proporsional
+    const big = buildComparison(KR_UZ, providers, quotes, NOW, toMinor(2_500_000, 'KRW'));
+    expect(big.rows[0].recvNormalizedMinor).toBe(toMinor(21_350_000, 'UZS'));
+    expect(big.amountSendFormatted).toBe('2,500,000');
+
+    // Tartib o'zgarmaydi — summa hammaga bir xil ta'sir qiladi
+    expect(big.rows.map((r) => r.providerSlug)).toEqual(one.rows.map((r) => r.providerSlug));
+  });
+
+  it('summa berilmasa namunaviy qiymatni ishlatadi va shunday belgilaydi', () => {
+    const r = buildComparison(
+      KR_UZ, [provider('a')],
+      [quote('a', 854_000, { sendMajor: 100_000, fetchedAt: ago(1) })],
+      NOW,
+    );
+    expect(r.isSample).toBe(true);
+    expect(r.amountSendMinor).toBe(KR_UZ.sampleSendMinor);
+  });
+
+  it('nol yoki manfiy summani namunaviy qiymat bilan almashtiradi', () => {
+    const r = buildComparison(
+      KR_UZ, [provider('a')],
+      [quote('a', 854_000, { sendMajor: 100_000, fetchedAt: ago(1) })],
+      NOW, 0n,
+    );
+    expect(r.isSample).toBe(true);
   });
 
   it('boshqa koridorning kotirovkasini qo\'shmaydi', () => {
@@ -133,16 +174,16 @@ describe('buildComparison', () => {
       RU_UZ,
       [provider('korona', { countries: ['RU'] }), provider('unistream', { countries: ['RU'] })],
       [
-        // 50 000 RUB -> 7 500 000 so'm
-        quote('korona', 7_500_000, { corridor: RU_UZ, fetchedAt: ago(1) }),
-        quote('unistream', 7_300_000, { corridor: RU_UZ, fetchedAt: ago(1) }),
+        // namunaviy 10 000 RUB -> 1 500 000 so'm
+        quote('korona', 1_500_000, { corridor: RU_UZ, fetchedAt: ago(1) }),
+        quote('unistream', 1_460_000, { corridor: RU_UZ, fetchedAt: ago(1) }),
       ],
       NOW,
     );
     expect(r.sendCurrency).toBe('RUB');
     expect(r.recvCurrency).toBe('UZS');
     expect(r.corridorLabel).toBe("Rossiya → O'zbekiston");
-    expect(r.baseSendFormatted).toBe('50 000');
+    expect(r.amountSendFormatted).toBe('10 000'); // ~100 USD ekvivalenti
     expect(r.rows[0].providerSlug).toBe('korona');
   });
 });

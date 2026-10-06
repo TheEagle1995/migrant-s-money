@@ -5,49 +5,16 @@ import { CORRIDORS } from '../src/domain/corridor';
 
 const db = new PrismaClient();
 
-type Kind = 'SMALL_REMITTANCE' | 'BANK_APP' | 'BANK' | 'WALLET';
+import providersSeed from './providers.seed.json';
 
-/**
- * Provayderlar koridor bo'yicha. Har biri qaysi davlatdan yuborilishini
- * aytadi — shuning uchun Sentbe (Koreya) va Korona (Rossiya) bitta
- * ro'yxatda chiqib qolmaydi.
- */
-const PROVIDERS: Array<{
+const PROVIDERS = providersSeed as Array<{
   slug: string;
   displayName: string;
-  kind: Kind;
+  kind: string;
   sendCountries: string[];
-  isLicensed?: boolean;
-}> = [
-  // --- Koreya ---
-  { slug: 'toss',       displayName: 'Toss',           kind: 'BANK_APP',         sendCountries: ['KR'] },
-  { slug: 'sentbe',     displayName: 'Sentbe',         kind: 'SMALL_REMITTANCE', sendCountries: ['KR'] },
-  { slug: 'hanpass',    displayName: 'Hanpass',        kind: 'SMALL_REMITTANCE', sendCountries: ['KR'] },
-  { slug: 'gme',        displayName: 'GME',            kind: 'SMALL_REMITTANCE', sendCountries: ['KR'] },
-  { slug: 'cross',      displayName: 'Cross',          kind: 'SMALL_REMITTANCE', sendCountries: ['KR'] },
-  { slug: 'moin',       displayName: 'Moin',           kind: 'SMALL_REMITTANCE', sendCountries: ['KR'] },
-  { slug: 'wirebarley', displayName: 'WireBarley',     kind: 'SMALL_REMITTANCE', sendCountries: ['KR'] },
-  { slug: 'e9pay',      displayName: 'E9pay',          kind: 'SMALL_REMITTANCE', sendCountries: ['KR'] },
-  { slug: 'keb-hana',   displayName: 'KEB Hana Bank',  kind: 'BANK',             sendCountries: ['KR'] },
-
-  // --- Rossiya ---
-  { slug: 'korona',     displayName: 'Korona Pay',     kind: 'WALLET',           sendCountries: ['RU'] },
-  { slug: 'unistream',  displayName: 'Unistream',      kind: 'WALLET',           sendCountries: ['RU'] },
-  { slug: 'contact',    displayName: 'Contact',        kind: 'WALLET',           sendCountries: ['RU'] },
-  { slug: 'sber-remit', displayName: 'Sberbank',       kind: 'BANK',             sendCountries: ['RU'] },
-  { slug: 'tbank-remit',displayName: 'T-Bank',         kind: 'BANK_APP',         sendCountries: ['RU'] },
-
-  // --- Qozog'iston ---
-  { slug: 'kaspi-remit',displayName: 'Kaspi',          kind: 'BANK_APP',         sendCountries: ['KZ'] },
-  { slug: 'halyk-remit',displayName: 'Halyk Bank',     kind: 'BANK',             sendCountries: ['KZ'] },
-
-  // --- AQSh / Turkiya / BAA: global operatorlar ---
-  { slug: 'wise',       displayName: 'Wise',           kind: 'SMALL_REMITTANCE', sendCountries: ['US', 'TR', 'AE', 'PL'] },
-  { slug: 'remitly',    displayName: 'Remitly',        kind: 'SMALL_REMITTANCE', sendCountries: ['US', 'AE'] },
-  { slug: 'western-union', displayName: 'Western Union', kind: 'WALLET',         sendCountries: ['US', 'TR', 'AE', 'RU', 'KZ'] },
-  { slug: 'moneygram',  displayName: 'MoneyGram',      kind: 'WALLET',           sendCountries: ['US', 'TR', 'AE'] },
-  { slug: 'ria',        displayName: 'Ria',            kind: 'WALLET',           sendCountries: ['US', 'TR'] },
-];
+  payouts: string[];
+  funding: string[];
+}>;
 
 const CATEGORIES = [
   { slug: 'oziq-ovqat', nameUz: 'Oziq-ovqat' },
@@ -65,7 +32,12 @@ async function main(): Promise<void> {
     await db.provider.upsert({
       where: { slug: p.slug },
       create: p as never,
-      update: { displayName: p.displayName, sendCountries: p.sendCountries } as never,
+      update: {
+        displayName: p.displayName,
+        sendCountries: p.sendCountries,
+        payouts: p.payouts,
+        funding: p.funding,
+      } as never,
     });
   }
 
@@ -98,9 +70,11 @@ async function main(): Promise<void> {
   }
 
   const live = CORRIDORS.filter((c) => c.isLive).length;
+  const countries = new Set(CORRIDORS.flatMap((c) => [c.send, c.recv]));
   console.log(
     `Seed: ${PROVIDERS.length} provayder, ${(banksSeed as unknown[]).length} bank, ` +
-    `${CATEGORIES.length} kategoriya, ${live}/${CORRIDORS.length} faol koridor`,
+    `${CATEGORIES.length} kategoriya, ${live}/${CORRIDORS.length} faol koridor, ` +
+    `${countries.size} davlat`,
   );
   console.log('');
   console.log('DIQQAT: parser shablonlari TAXMIN — real SMS matnlari bilan tekshiring.');

@@ -14,7 +14,7 @@
  */
 
 import { CurrencyCode, parseMinor } from '../domain/currency';
-import { CountryCode } from '../domain/corridor';
+import { CountryCode, COUNTRIES } from '../domain/corridor';
 
 export interface Bank {
   country: CountryCode;
@@ -55,11 +55,6 @@ export type ParseResult =
   | { ok: true; value: ParsedSms }
   | { ok: false; error: ParseFailure };
 
-/** Davlat → valyuta. Hodisa summasi qaysi valyutada ekanini aniqlash uchun. */
-const COUNTRY_CURRENCY: Record<CountryCode, CurrencyCode> = {
-  UZ: 'UZS', KR: 'KRW', RU: 'RUB', KZ: 'KZT', US: 'USD',
-  TR: 'TRY', KG: 'KGS', TJ: 'TJS', AE: 'AED', PL: 'PLN',
-};
 
 export class SmsParser {
   private banks: Bank[];
@@ -109,7 +104,7 @@ export class SmsParser {
 
     if (candidates.length === 0) return fail(bank.slug, 'NO_TEMPLATE');
 
-    const code = COUNTRY_CURRENCY[bank.country];
+    const code = COUNTRIES[bank.country].currency;
 
     for (let i = 0; i < candidates.length; i++) {
       const tpl = candidates[i];

@@ -26,7 +26,7 @@ export function renderDailyPost(r: ComparisonResult, date: Date = new Date()): s
   }
 
   const lines = [
-    `${flagFrom}${flagTo} *${r.baseSendFormatted} ${sendSym} yuborsangiz qancha keladi*`,
+    `${flagFrom}${flagTo} *${r.amountSendFormatted} ${sendSym} yuborsangiz qancha keladi*`,
     `_${r.corridorLabel} · ${d}_`,
     '',
   ];
@@ -75,7 +75,7 @@ export function renderMultiCorridorPost(
     const flags = c ? `${COUNTRIES[c.send].flag}${COUNTRIES[c.recv].flag}` : '';
     const best = r.best!;
     lines.push(
-      `${flags} *${r.baseSendFormatted} ${currency(r.sendCurrency).symbol}* → ` +
+      `${flags} *${r.amountSendFormatted} ${currency(r.sendCurrency).symbol}* → ` +
       `${best.recvFormatted} ${currency(r.recvCurrency).symbol}`,
     );
     lines.push(`     ${best.displayName}${r.rows.length > 1 ? `, farq ${(r.spread * 100).toFixed(1)}%` : ''}`);
@@ -101,7 +101,7 @@ export function renderAlert(
     : corridorId;
   return (
     `🔔 *${providerName}* kursi ko'tarildi\n_${head}_\n\n` +
-    `${c ? `${formatMinor(c.baseSendMinor, c.sendCurrency)} ${currency(c.sendCurrency).symbol} → ` : ''}` +
+    `${c ? `${formatMinor(c.sampleSendMinor, c.sendCurrency)} ${currency(c.sendCurrency).symbol} → ` : ''}` +
     `*${formatMinor(valueMinor, recv)} ${sym}*\n` +
     `Sizning chegarangiz: ${formatMinor(thresholdMinor, recv)} ${sym}`
   );

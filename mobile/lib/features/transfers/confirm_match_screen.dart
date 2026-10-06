@@ -22,7 +22,8 @@ class MatchCandidate {
 
   factory MatchCandidate.fromJson(Map<String, dynamic> j) => MatchCandidate(
         eventId: j['eventId'] as String,
-        amount: Money.uzs(BigInt.parse(j['amountMinor'] as String)),
+        amount: Money(BigInt.parse(j['amountMinor'] as String),
+            j['currency'] as String? ?? 'UZS'),
         occurredAt: DateTime.parse(j['occurredAt'] as String),
         bankSlug: j['bankSlug'] as String,
         deviation: (j['deviation'] as num).toDouble(),
