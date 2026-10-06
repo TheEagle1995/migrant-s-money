@@ -1,0 +1,94 @@
+name: Android APK
+
+# APK'ni GitHub quradi — lokal Flutter/Android SDK kerak emas.
+# Ishga tushirish: Actions -> Android APK -> Run workflow
+# Natija: "Artifacts" bo'limida remit-apk.zip
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: "Backend manzili (bo'sh qoldirsangiz ilova ichida sozlanadi)"
+        required: false
+        default: ""
+  push:
+    branches: [main]
+    paths:
+      - "mobile/**"
+      - ".github/workflows/android.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Platforma fayllarini generatsiya qilish
+        # android/ papkasi repoda saqlanmaydi — Flutter uni o'zi yaratadi,
+        # shunda SDK/Gradle versiyalari doim mos keladi.
+        #
+        # Lekin `flutter create` pubspec.yaml va lib/main.dart ni o'z shabloni
+        # bilan qayta yozib yuborishi mumkin. Bu bog'liqliklarni (http,
+        # shared_preferences) va ilova kodini yo'qotadi, build esa tushunarsiz
+        # xato bilan yiqiladi. Shuning uchun avval nusxa olamiz.
+        run: |
+          cp pubspec.yaml /tmp/pubspec.yaml.bak
+          cp -r lib /tmp/lib.bak
+          flutter create --platforms=android --org uz.remit --project-name remit .
+          cp /tmp/pubspec.yaml.bak pubspec.yaml
+          rm -rf lib && cp -r /tmp/lib.bak lib
+          echo "--- pubspec tiklandi:"
+          grep -A4 '^dependencies:' pubspec.yaml
+
+      - name: Bizning Android fayllarni qaytarish
+        # Manifest (RECEIVE_SMS, receiver) va Kotlin kanallari
+        run: ./tool/apply_android_overrides.sh
+
+      - name: Bog'liqliklar
+        run: flutter pub get
+
+      - name: Analiz
+        run: flutter analyze --no-fatal-infos
+        continue-on-error: true
+
+      - name: Testlar
+        run: flutter test
+        # Birinchi muvaffaqiyatli yugurishdan keyin continue-on-error ni
+        # olib tashlang — shunda testlar haqiqatan himoya qiladi.
+        continue-on-error: true
+
+      - name: APK qurish
+        run: |
+          if [ -n "${{ github.event.inputs.api_url }}" ]; then
+            flutter build apk --release \
+              --dart-define=API_URL=${{ github.event.inputs.api_url }}
+          else
+            flutter build apk --release
+          fi
+
+      - name: Nomini o'zgartirish
+        run: |
+          mkdir -p out
+          cp build/app/outputs/flutter-apk/app-release.apk \
+             out/remit-$(date +%Y%m%d)-${GITHUB_SHA::7}.apk
+          ls -lh out/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: remit-apk
+          path: mobile/out/*.apk
+          retention-days: 30

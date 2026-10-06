@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+*.tsbuildinfo
+coverage/
+mobile/android/
+mobile/ios/
+mobile/build/
+mobile/.dart_tool/
+mobile/out/

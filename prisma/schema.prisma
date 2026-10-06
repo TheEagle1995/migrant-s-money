@@ -1,0 +1,280 @@
+// Remittance comparison + family budget
+// Ikki bounded context: `rates` va `household`. Yagona kesishma nuqtasi — Transfer.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================ rates context
+
+enum ProviderKind {
+  SMALL_REMITTANCE // 소액해외송금업자 (Sentbe, Hanpass, GME, Cross)
+  BANK_APP // Toss, Kakao
+  BANK // an'anaviy bank o'tkazmasi
+}
+
+model Provider {
+  id          String       @id @default(cuid())
+  slug        String       @unique // "toss", "sentbe", "hanpass"
+  displayName String
+  kind        ProviderKind
+  isLicensed  Boolean      @default(true) // 기획재정부 ro'yxatida bormi
+  homepageUrl String?
+  // affiliate holati — ranking'ga TA'SIR QILMAYDI, faqat hisobot uchun
+  affiliateActive Boolean @default(false)
+  isActive        Boolean @default(true)
+
+  quotes    Quote[]
+  fetchRuns FetchRun[]
+  transfers Transfer[]
+
+  @@map("providers")
+}
+
+/// Har bir kotirovka o'zgarmas faktdir. UPDATE hech qachon qilinmaydi.
+/// "Joriy kurs" = ORDER BY fetchedAt DESC LIMIT 1.
+model Quote {
+  id         BigInt   @id @default(autoincrement())
+  providerId String
+  provider   Provider @relation(fields: [providerId], references: [id])
+
+  sendCurrency String // "KRW"
+  recvCurrency String // "UZS"
+  /// Minor unitda. KRW uchun butun won, UZS uchun butun so'm (tiyin yo'q).
+  sendMinor    BigInt
+  feeMinor     BigInt  @default(0)
+  rate         Decimal @db.Decimal(24, 10)
+  /// Yakuniy summa SAQLANADI, hisoblanmaydi — provider formulasi o'zgarsa
+  /// eski yozuvlar buzilmasin.
+  recvMinor    BigInt
+
+  recvBank      String?
+  payoutMethod  String? // "CARD" | "ACCOUNT" | "CASH_PICKUP"
+  etaMinutes    Int?
+  /// Promo/birinchi o'tkazma chegirmasi qo'llanganmi
+  isPromotional Boolean @default(false)
+
+  fetchedAt DateTime
+  source    QuoteSource @default(SCRAPE)
+  runId     String?
+  run       FetchRun?   @relation(fields: [runId], references: [id])
+
+  @@index([sendCurrency, recvCurrency, fetchedAt(sort: Desc)])
+  @@index([providerId, fetchedAt(sort: Desc)])
+  @@map("quotes")
+}
+
+enum QuoteSource {
+  SCRAPE // adapter olib keldi
+  MANUAL // qo'lda kiritilgan (Faza 0 — o'lchov jadvali)
+  OFFICIAL // portal.kfb.or.kr rasmiy e'lon
+  OBSERVED // real o'tkazmadan tasdiqlangan — eng ishonchli
+}
+
+enum RunStatus {
+  OK
+  PARSE_ERROR
+  TIMEOUT
+  BLOCKED
+  UNKNOWN_ERROR
+}
+
+/// Adapter salomatligi. Bu jadvalsiz sayt HTML'i o'zgarganini bilmaysan.
+model FetchRun {
+  id         String    @id @default(cuid())
+  providerId String
+  provider   Provider  @relation(fields: [providerId], references: [id])
+  status     RunStatus
+  /// Javob body'sining hash'i — o'zgarish sodir bo'lganini aniqlash uchun
+  rawHash     String?
+  durationMs  Int?
+  errorText   String?
+  startedAt   DateTime
+  finishedAt  DateTime?
+  quotes      Quote[]
+
+  @@index([providerId, startedAt(sort: Desc)])
+  @@map("fetch_runs")
+}
+
+// ======================================================== household context
+
+model Household {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  members       HouseholdMember[]
+  transfers     Transfer[]
+  inboundEvents InboundEvent[]
+  goals         Goal[]
+
+  @@map("households")
+}
+
+enum MemberRole {
+  SENDER // Koreyada — pul yuboradi
+  RECEIVER // O'zbekistonda — SMS keladi
+}
+
+model HouseholdMember {
+  id          String     @id @default(cuid())
+  householdId String
+  household   Household  @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  role        MemberRole
+  displayName String
+  /// Qabul qiluvchi tomon SMS parsing'ga rozilik berganmi.
+  /// Rozilik bo'lmasa hech qanday tranzaksiya qabul qilinmaydi.
+  smsConsentAt DateTime?
+
+  @@index([householdId])
+  @@map("household_members")
+}
+
+enum TransferStatus {
+  PENDING // yuborildi deb belgilandi, hali SMS kelmadi
+  MATCHED // InboundEvent bilan bog'landi
+  UNMATCHED // 72 soat o'tdi, moslik topilmadi
+  CANCELLED
+}
+
+/// Ikki kontekst kesishadigan yagona joy.
+model Transfer {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  providerId  String?
+  provider    Provider? @relation(fields: [providerId], references: [id])
+
+  sentMinor BigInt // KRW
+  /// Belgilangan paytdagi Quote asosidagi prognoz. Match uchun asos.
+  expectedRecvMinor BigInt?
+  quoteId           BigInt?
+
+  declaredAt DateTime
+  status     TransferStatus @default(PENDING)
+
+  matchedEvent InboundEvent?
+
+  @@index([householdId, declaredAt(sort: Desc)])
+  @@index([status])
+  @@map("transfers")
+}
+
+enum EventKind {
+  CREDIT
+  DEBIT
+}
+
+/// Qurilmada parse qilingan SMS natijasi. RAW MATN HECH QACHON SAQLANMAYDI.
+model InboundEvent {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  amountMinor BigInt // UZS
+  kind        EventKind
+  bankSlug    String
+  cardLast4   String?
+  merchant    String?
+  categoryId  String?
+  category    Category? @relation(fields: [categoryId], references: [id])
+
+  occurredAt DateTime
+  /// Parser ishonch darajasi. < 0.8 bo'lsa foydalanuvchidan tasdiq so'raladi.
+  confidence    Float
+  parserVersion Int
+
+  transferId String?   @unique
+  transfer   Transfer? @relation(fields: [transferId], references: [id])
+  /// Match avtomatikmi yoki foydalanuvchi tasdiqladimi
+  matchConfirmedBy String?
+
+  @@index([householdId, occurredAt(sort: Desc)])
+  @@index([householdId, kind, occurredAt])
+  @@map("inbound_events")
+}
+
+model Category {
+  id     String  @id @default(cuid())
+  slug   String  @unique // "oziq-ovqat", "kommunal", "dori", "ta-lim"
+  nameUz String
+  icon   String?
+  events InboundEvent[]
+
+  @@map("categories")
+}
+
+/// Mahsulotning to'g'ri freymingi: nazorat emas, umumiy maqsad.
+model Goal {
+  id          String    @id @default(cuid())
+  householdId String
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  title       String // "Uy ta'miri", "To'y"
+  targetMinor BigInt // UZS
+  savedMinor  BigInt    @default(0)
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([householdId])
+  @@map("goals")
+}
+
+/// SMS parsing shablonlari — SERVERDA saqlanadi, remote yangilanadi.
+/// Bank format o'zgartirsa, app update'siz tuzatiladi.
+model ParserTemplate {
+  id         String   @id @default(cuid())
+  bankSlug   String
+  version    Int
+  pattern    String // RE2-mos regex, named group'lar bilan
+  amountGroup String  @default("amt")
+  kindMap    Json // {"Popolnenie": "CREDIT", "Oplata": "DEBIT"}
+  locale     String   @default("uz")
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@unique([bankSlug, version])
+  @@index([isActive, bankSlug])
+  @@map("parser_templates")
+}
+
+/// Kurs ogohlantirishi. Telegram chat'ga bog'lanadi — ro'yxatdan o'tish shart emas.
+model AlertSubscription {
+  id       String @id @default(cuid())
+  chatId   String
+  /// 1 mln KRW uchun so'm chegarasi
+  thresholdMinor BigInt
+  /// null = har qanday kanal
+  providerSlug   String?
+  /// Takroriy spam'ning oldini olish uchun
+  lastFiredValueMinor BigInt?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([isActive])
+  @@index([chatId])
+  @@map("alert_subscriptions")
+}
+
+/// Telegram kurs ogohlantirishlari.
+model AlertSubscription {
+  id                  String   @id @default(cuid())
+  chatId              String
+  /// 1 mln KRW uchun so'm. Shundan oshsa xabar yuboriladi.
+  thresholdMinor      BigInt
+  /// null = har qanday kanal
+  providerSlug        String?
+  /// Oxirgi yuborilgan qiymat — takroriy spamning oldini oladi
+  lastFiredValueMinor BigInt?
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+
+  @@index([isActive])
+  @@index([chatId])
+  @@map("alert_subscriptions")
+}

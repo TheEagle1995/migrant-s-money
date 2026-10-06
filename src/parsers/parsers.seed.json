@@ -1,0 +1,24 @@
+[
+  {
+    "bankSlug": "kapital",
+    "version": 1,
+    "pattern": "(?<card>\\d{4})\\s*[:.]?\\s*(?<kind>Popolnenie|Popolneniye|Oplata|Snyatie|Perevod)\\s*[:.]?\\s*(?<amt>[\\d\\s.,]+)\\s*(?:UZS|sum|so'm)(?:\\s*(?<merchant>[^\\n]{2,40}))?",
+    "amountGroup": "amt",
+    "decimalSeparator": ",",
+    "kindMap": {
+      "popolnenie": "CREDIT",
+      "popolneniye": "CREDIT",
+      "oplata": "DEBIT",
+      "snyatie": "DEBIT",
+      "perevod": "DEBIT"
+    }
+  },
+  {
+    "bankSlug": "uzcard",
+    "version": 1,
+    "pattern": "HUMO|UZCARD.*?(?<kind>Popolnenie|Oplata)\\s*(?<amt>[\\d\\s.,]+)\\s*(?:UZS|sum)",
+    "amountGroup": "amt",
+    "decimalSeparator": ",",
+    "kindMap": { "popolnenie": "CREDIT", "oplata": "DEBIT" }
+  }
+]
