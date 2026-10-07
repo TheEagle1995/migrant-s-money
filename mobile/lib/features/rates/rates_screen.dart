@@ -458,7 +458,7 @@ class _RatesScreenState extends State<RatesScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary.withValues(alpha: .08),
+        color: Theme.of(context).colorScheme.primary.withOpacity(.08),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Text(
@@ -479,7 +479,7 @@ class _RatesScreenState extends State<RatesScreen> {
     return Card(
       elevation: isFirst ? 1 : 0,
       color: isFirst
-          ? Theme.of(context).colorScheme.primary.withValues(alpha: .10)
+          ? Theme.of(context).colorScheme.primary.withOpacity(.10)
           : null,
       margin: const EdgeInsets.only(bottom: 7),
       child: ListTile(

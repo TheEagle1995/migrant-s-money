@@ -115,12 +115,48 @@ jobs:
           Commit: \`${GITHUB_SHA::7}\`
           Server manzili ilova ichidagi Sozlamalardan kiritiladi."
           echo "TAG=$TAG" >> "$GITHUB_STEP_SUMMARY"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
 
       # APK yuqorida allaqachon qurilib, release'ga yuklangan — shuning uchun
-      # bu tekshiruvlar oxirida turadi. continue-on-error YO'Q: test yiqilsa
-      # build qizil bo'ladi va biz bilib olamiz, lekin APK baribir qo'lda bo'ladi.
-      - name: Analiz
-        run: flutter analyze --no-fatal-infos
+      # bu tekshiruvlar oxirida turadi. Test yiqilsa build qizil bo'ladi va
+      # biz bilib olamiz, lekin APK baribir release'da qoladi.
+      #
+      # Natija release izohiga ham yoziladi: Actions loglari faqat vaqtinchalik
+      # havola orqali olinadi, release esa API orqali o'qiladi.
+      - name: Analiz va testlar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          flutter analyze --no-fatal-infos > /tmp/analyze.txt 2>&1
+          A=$?
+          flutter test > /tmp/test.txt 2>&1
+          T=$?
+          set -e
 
-      - name: Testlar
-        run: flutter test
+          echo "=== analyze (exit $A) ==="; cat /tmp/analyze.txt
+          echo "=== test (exit $T) ===";    cat /tmp/test.txt
+
+          if [ -n "$TAG" ]; then
+            gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body \
+              --jq .body > /tmp/body.md || echo "" > /tmp/body.md
+            {
+              cat /tmp/body.md
+              echo ""
+              echo "---"
+              echo ""
+              echo "### flutter analyze — exit $A"
+              echo '```'
+              tail -c 3000 /tmp/analyze.txt
+              echo '```'
+              echo ""
+              echo "### flutter test — exit $T"
+              echo '```'
+              tail -c 3000 /tmp/test.txt
+              echo '```'
+            } > /tmp/new-body.md
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" \
+              --notes-file /tmp/new-body.md || true
+          fi
+
+          [ "$A" -eq 0 ] && [ "$T" -eq 0 ]
