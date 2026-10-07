@@ -64,30 +64,28 @@ jobs:
       - name: Bog'liqliklar
         run: flutter pub get
 
-      - name: Analiz
-        run: flutter analyze --no-fatal-infos
-        continue-on-error: true
-
-      - name: Testlar
-        run: flutter test
-        # Birinchi muvaffaqiyatli yugurishdan keyin continue-on-error ni
-        # olib tashlang — shunda testlar haqiqatan himoya qiladi.
-        continue-on-error: true
-
       - name: APK qurish
+        # --split-per-abi: har bir protsessor arxitekturasi uchun alohida APK.
+        # Universal APK ~50 MB, alohidalari ~16 MB — ulashish ancha qulay.
+        # Universal ham quriladi, chunki arxitekturani bilmaganda u ishlaydi.
         run: |
+          EXTRA=""
           if [ -n "${{ github.event.inputs.api_url }}" ]; then
-            flutter build apk --release \
-              --dart-define=API_URL=${{ github.event.inputs.api_url }}
-          else
-            flutter build apk --release
+            EXTRA="--dart-define=API_URL=${{ github.event.inputs.api_url }}"
           fi
+          flutter build apk --release --split-per-abi $EXTRA
+          flutter build apk --release $EXTRA
 
       - name: Nomini o'zgartirish
         run: |
           mkdir -p out
+          STAMP="$(date +%Y%m%d)-${GITHUB_SHA::7}"
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
+             "out/Chiroq-$STAMP-arm64.apk"
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk \
+             "out/Chiroq-$STAMP-arm32.apk"
           cp build/app/outputs/flutter-apk/app-release.apk \
-             out/chiroq-$(date +%Y%m%d)-${GITHUB_SHA::7}.apk
+             "out/Chiroq-$STAMP-universal.apk"
           ls -lh out/
 
       - uses: actions/upload-artifact@v4
@@ -109,6 +107,20 @@ jobs:
             --title "Chiroq APK — $(date +%Y-%m-%d\ %H:%M) UTC" \
             --notes "Test uchun APK. Debug kalit bilan imzolangan — telefonga o'rnatish mumkin, Play Store uchun emas.
 
+          **Qaysi faylni olish:**
+          - \`arm64\` — deyarli barcha zamonaviy telefonlar (2017 yildan keyingi)
+          - \`arm32\` — eski telefonlar
+          - \`universal\` — arxitekturani bilmasangiz, hammasida ishlaydi (kattaroq)
+
           Commit: \`${GITHUB_SHA::7}\`
           Server manzili ilova ichidagi Sozlamalardan kiritiladi."
           echo "TAG=$TAG" >> "$GITHUB_STEP_SUMMARY"
+
+      # APK yuqorida allaqachon qurilib, release'ga yuklangan — shuning uchun
+      # bu tekshiruvlar oxirida turadi. continue-on-error YO'Q: test yiqilsa
+      # build qizil bo'ladi va biz bilib olamiz, lekin APK baribir qo'lda bo'ladi.
+      - name: Analiz
+        run: flutter analyze --no-fatal-infos
+
+      - name: Testlar
+        run: flutter test
