@@ -17,6 +17,9 @@ on:
       - "mobile/**"
       - ".github/workflows/android.yml"
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -92,3 +95,20 @@ jobs:
           name: chiroq-apk
           path: mobile/out/*.apk
           retention-days: 30
+
+      # Artifact faqat GitHub interfeysi orqali yuklanadi va havolasi vaqtinchalik.
+      # Release esa barqaror to'g'ridan-to'g'ri havola beradi — telefonga
+      # yuborish, boshqalarga ulashish va avtomatik yuklab olish uchun qulay.
+      - name: Release yaratish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="apk-$(date +%Y%m%d-%H%M)-${GITHUB_SHA::7}"
+          gh release create "$TAG" out/*.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "Chiroq APK — $(date +%Y-%m-%d\ %H:%M) UTC" \
+            --notes "Test uchun APK. Debug kalit bilan imzolangan — telefonga o'rnatish mumkin, Play Store uchun emas.
+
+          Commit: \`${GITHUB_SHA::7}\`
+          Server manzili ilova ichidagi Sozlamalardan kiritiladi."
+          echo "TAG=$TAG" >> "$GITHUB_STEP_SUMMARY"
