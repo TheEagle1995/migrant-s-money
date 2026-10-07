@@ -50,7 +50,7 @@ class ConfirmMatchScreen extends StatefulWidget {
 }
 
 class _ConfirmMatchScreenState extends State<ConfirmMatchScreen> {
-  late Future<List<MatchCandidate>> _future = _load();
+  late final Future<List<MatchCandidate>> _future = _load();
   bool _busy = false;
 
   Future<List<MatchCandidate>> _load() async {

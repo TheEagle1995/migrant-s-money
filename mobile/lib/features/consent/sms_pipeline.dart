@@ -1,6 +1,7 @@
 import 'dart:async';
-import '../core/api_client.dart';
-import '../platform/sms_channel.dart';
+import '../../core/api_client.dart';
+import '../../platform/sms_channel.dart';
+import 'event_queue.dart';
 
 /// Serverdan kelgan shablon. `GET /parsers?since=<v>` bilan yangilanadi.
 class ParserTemplate {

@@ -121,7 +121,7 @@ class _DeclareTransferScreenState extends State<DeclareTransferScreen> {
             const Text('Bu koridor uchun kurs yuklanmagan.')
           else
             DropdownButtonFormField<String>(
-              value: _slug,
+              initialValue: _slug,
               decoration: const InputDecoration(
                 labelText: 'Qaysi kanal orqali',
                 border: OutlineInputBorder(),
@@ -139,7 +139,7 @@ class _DeclareTransferScreenState extends State<DeclareTransferScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(.10),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: .10),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(

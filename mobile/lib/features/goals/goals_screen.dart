@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/api_client.dart';
-import '../../core/money.dart';
 import '../../models/goal.dart';
 
 /// Oilaviy maqsadlar.

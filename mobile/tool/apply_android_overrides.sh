@@ -20,4 +20,9 @@ cp -v android_overrides/app/src/main/kotlin/uz/chiroq/*.kt \
 # flutter create boshqa paket nomida MainActivity yaratgan bo'lsa — olib tashlaymiz
 find android/app/src/main/kotlin -name MainActivity.kt ! -path "*uz/chiroq/*" -delete 2>/dev/null || true
 
+# `flutter create` standart test faylini yaratadi va u bizda mavjud bo'lmagan
+# `MyApp` klassiga murojaat qiladi — analizni yiqitadi. Bizning testlar
+# test/ ichida alohida fayllarda.
+rm -f test/widget_test.dart
+
 echo "Android overrides qo'llandi."

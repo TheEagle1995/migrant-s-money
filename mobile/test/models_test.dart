@@ -73,20 +73,21 @@ void main() {
         'goal': {
           'id': 'g1',
           'title': 'Uy ta\'miri',
-          'targetMinor': '100000000',
-          'savedMinor': '25000000',
+          // UZS ikki kasrli: 100 000 000 so'm = 10 000 000 000 tiyin
+          'targetMinor': '10000000000',
+          'savedMinor': '2500000000',
         },
         'ratio': 0.25,
-        'remainingMinor': '75000000',
+        'remainingMinor': '7500000000',
         'isComplete': false,
         'daysLeft': 90,
-        'requiredPerMonthMinor': '25000000',
+        'requiredPerMonthMinor': '2500000000',
       });
 
       expect(g.title, 'Uy ta\'miri');
       expect(g.ratio, 0.25);
       expect(g.remaining.formatted, '75 000 000');
-      expect(g.requiredPerMonth!.minor, BigInt.from(25000000));
+      expect(g.requiredPerMonth!.formatted, '25 000 000');
       expect(g.isComplete, isFalse);
     });
 
@@ -95,8 +96,8 @@ void main() {
         'goal': {
           'id': 'g2',
           'title': 'To\'y',
-          'targetMinor': '50000000',
-          'savedMinor': '50000000',
+          'targetMinor': '5000000000',
+          'savedMinor': '5000000000',
         },
         'ratio': 1.0,
         'remainingMinor': '0',
